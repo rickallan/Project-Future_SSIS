@@ -1,0 +1,72 @@
+﻿<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="12/11/2023 8:19:27 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="DELL5570"
+  DTS:CreatorName="DELL5570\nikos"
+  DTS:DTSID="{FE54015E-C474-450B-A00F-BAB198C091A8}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="16.0.5396.0"
+  DTS:LocaleID="1032"
+  DTS:ObjectName="Package1"
+  DTS:PackageType="5"
+  DTS:VersionBuild="4"
+  DTS:VersionGUID="{644EC67B-BE29-4CC4-B3D3-99E50620F8EC}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{FC042D55-DE31-4D34-AFA3-EF6AF5FC240D}"
+      DTS:ObjectName="DELL5570.ChinookDWSSIS">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=DELL5570;Initial Catalog=ChinookDWSSIS;Provider=SQLOLEDB.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{FC042D55-DE31-4D34-AFA3-EF6AF5FC240D}DELL5570.ChinookDWSSIS;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables />
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\Remove Relationships in ChinookDWSSIS"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{9D00E41E-3F88-4231-A7CF-AF46F621136C}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Remove Relationships in ChinookDWSSIS"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2022; © 2022 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{FC042D55-DE31-4D34-AFA3-EF6AF5FC240D}"
+          SQLTask:SqlStatementSource="use ChinookDWSSIS&#xA;&#xA;ALTER TABLE FactSales drop  constraint [FactSalesDimDate];&#xA;&#xA;ALTER TABLE FactSales drop  constraint [FactSalesDimCustomers];&#xA;&#xA;ALTER TABLE FactSales drop  constraint [FactSalesDimTracks];" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph">
+        <NodeLayout
+          Size="272.8,41.6"
+          Id="Package\Remove Relationships in ChinookDWSSIS"
+          TopLeft="297.142857775396,181.235293958787" />
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>

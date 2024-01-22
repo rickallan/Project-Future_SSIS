@@ -1,0 +1,84 @@
+﻿<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="12/11/2023 7:58:00 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="DELL5570"
+  DTS:CreatorName="DELL5570\nikos"
+  DTS:DTSID="{DD407DBF-B3DD-4D53-B15E-56D113119DDD}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="16.0.5396.0"
+  DTS:LocaleID="1032"
+  DTS:ObjectName="SCD_Type2"
+  DTS:PackageType="5"
+  DTS:VersionBuild="7"
+  DTS:VersionGUID="{FF3211D5-3F6E-44D1-AEBD-1AD945028DB7}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{86643983-27C0-4023-9158-1510BE21C13B}"
+      DTS:ObjectName="DELL5570.ChinookDWSSIS">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=DELL5570;Initial Catalog=ChinookDWSSIS;Provider=SQLOLEDB.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{86643983-27C0-4023-9158-1510BE21C13B}DELL5570.ChinookDWSSIS;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DELL5570.ChinookStagingSSIS]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{5B944574-7D72-4980-9C01-6413C6800F71}"
+      DTS:ObjectName="DELL5570.ChinookStagingSSIS">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=DELL5570;Initial Catalog=ChinookStagingSSIS;Provider=SQLOLEDB.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{5B944574-7D72-4980-9C01-6413C6800F71}DELL5570.ChinookStagingSSIS;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables />
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\SCD Type 2 for Customer &amp; Invoice &amp; InvoiceLine Chinook"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{79DC1E4A-951E-464C-A7BF-75A1B0556998}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="SCD Type 2 for Customer &amp; Invoice &amp; InvoiceLine Chinook"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2022; © 2022 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{5B944574-7D72-4980-9C01-6413C6800F71}"
+          SQLTask:SqlStatementSource="--  OLTP -&gt; staging&#xA;&#xA;USE [ChinookStagingSSIS]&#xA;GO&#xA;&#xA;truncate table [ChinookStagingSSIS].[dbo].[Customers];&#xA;&#xA;insert into Customers(CustomerID, CustomerFirstName, CustomerLastName, CustomerCompany, CustomerCountry, CustomerState, CustomerCity, CustomerPostalCode, EmployeeFirstName, EmployeeLastName)&#xA;select c.CustomerID, c.FirstName, c.LastName, Company, c.Country, c.State, c.City, c.PostalCode, e.FirstName, e.LastName&#xA;FROM Chinook.[dbo].Customer c&#xA;JOIN Chinook.[dbo].Employee e&#xA;ON c.SupportRepId = e.EmployeeId&#xA;&#xA;-----------------------------------------------------------&#xA;truncate table [ChinookStagingSSIS].[dbo].Sales;&#xA;&#xA;insert into Sales(TrackId, CustomerId, InvoiceDate, InvoiceId, UnitPrice)&#xA;select TrackId, CustomerId, InvoiceDate, i.InvoiceId, UnitPrice&#xA;from Chinook.[dbo].Invoice i&#xA;join Chinook.[dbo].[InvoiceLine] il&#xA;on i.InvoiceID = il.InvoiceID&#xA;where InvoiceDate &gt;= '2013-12-23';&#xA;--------------------------------------------------------&#xA; &#xA;--  Staging -&gt;DW&#xA;&#xA;drop table if exists [ChinookStagingSSIS].[dbo].Staging_DimCustomers;&#xA;&#xA;create table [ChinookStagingSSIS].[dbo].Staging_DimCustomers(&#xA;&#x9;CustomerKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY,&#xA;    CustomerId INT NOT NULL,&#xA;&#x9;CustomerName NVARCHAR(60) NOT NULL,&#xA;&#x9;CustomerCompany NVARCHAR(80) NULL,&#xA;&#x9;CustomerCountry NVARCHAR(40) NULL,&#xA;&#x9;CustomerState NVARCHAR(40) NULL,&#xA;&#x9;CustomerCity NVARCHAR(40) NULL,&#xA;&#x9;CustomerPostalCode NVARCHAR(10) NULL,&#xA;&#x9;EmployeeName NVARCHAR(40) NOT NULL,&#xA;&#x9;RowIsCurrent INT DEFAULT 1 NOT NULL,&#xA;    RowStartDate DATE DEFAULT '1899-12-31' NOT NULL,&#xA;    RowEndDate DATE DEFAULT '9999-12-31' NOT NULL,&#xA;    RowChangeReason VARCHAR(200) NULL&#xA;);&#xA;&#xA;------------------------------&#xA;Insert into [ChinookStagingSSIS].[dbo].Staging_DimCustomers(&#xA;&#x9;CustomerId,&#xA;&#x9;CustomerName,&#xA;&#x9;CustomerCompany,&#xA;&#x9;CustomerCountry,&#xA;&#x9;CustomerState,&#xA;&#x9;CustomerCity,&#xA;&#x9;CustomerPostalCode,&#xA;&#x9;EmployeeName&#xA;)&#xA;(&#xA;SELECT&#xA;&#x9;CustomerID,&#xA;&#x9;[CustomerFirstName] + ' ' + [CustomerLastName],&#xA;&#x9;ISNULL([CustomerCompany],'N/A'),&#xA;&#x9;CustomerCountry,&#xA;&#x9;ISNULL(CustomerState,'n/a'),&#xA;&#x9;CustomerCity,&#xA;&#x9;COALESCE(CustomerPostalCode,'n/a'),&#xA;&#x9;[EmployeeFirstName] + ' ' + [EmployeeLastName]&#xA;from [ChinookStagingSSIS].[dbo].[Customers]&#xA;);&#xA;&#xA; -------------------------------------------------&#xA;&#xA;&#xA;--  Drop the constraints to continue to next step&#xA;--  Insert, Delete, Update dimensions in DimCustomers&#xA;&#xA;declare @etldate date = '2013-12-23';&#xA;&#xA;INSERT INTO ChinookDWSSIS.[dbo].DimCustomers(&#xA;&#x9;CustomerId,&#xA;&#x9;CustomerName,&#xA;&#x9;CustomerCompany,&#xA;&#x9;CustomerCountry,&#xA;&#x9;CustomerState,&#xA;&#x9;CustomerCity,&#xA;&#x9;CustomerPostalCode,&#xA;&#x9;EmployeeName,&#xA;&#x9;RowStartDate,&#xA;&#x9;RowChangeReason&#xA;)&#xA;SELECT &#xA;&#x9;CustomerId,&#xA;&#x9;CustomerName,&#xA;&#x9;CustomerCompany,&#xA;&#x9;CustomerCountry,&#xA;&#x9;CustomerState,&#xA;&#x9;CustomerCity,&#xA;&#x9;CustomerPostalCode,&#xA;&#x9;EmployeeName,&#xA;&#x9;@etldate,&#xA;&#x9;ActionName&#xA;FROM&#xA;(&#xA;&#x9;MERGE ChinookDWSSIS.[dbo].DimCustomers AS target&#xA;&#x9;&#x9;USING [ChinookStagingSSIS].[dbo].Staging_DimCustomers as source&#xA;&#x9;&#x9;ON target.[CustomerID] = source.[CustomerID]&#xA;&#x9; WHEN MATCHED &#x9; AND &#xA;&#x9; source.CustomerCity &lt;&gt; target.CustomerCity  &#xA;&#x9; AND target.[RowIsCurrent] = 1 &#xA;&#x9; THEN UPDATE SET&#xA;&#x9;&#x9; target.RowIsCurrent = 0,&#xA;&#x9;&#x9; target.RowEndDate = dateadd(day, -1, @etldate ) ,&#xA;&#x9;&#x9; target.RowChangeReason = 'UPDATED NOT CURRENT'&#xA;&#x9; WHEN NOT MATCHED THEN&#xA;&#x9;   INSERT  (&#x9;CustomerId,&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;CustomerName,&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;CustomerCompany,&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;CustomerCountry,&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;CustomerState,&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;CustomerCity,&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;CustomerPostalCode,&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;EmployeeName,&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;RowStartDate,&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;RowChangeReason&#xA;&#x9;   )&#xA;&#x9;   VALUES( &#xA;&#x9;&#x9;&#x9;source.CustomerID,&#xA;&#x9;&#x9;&#x9;source.CustomerName,&#xA;&#x9;&#x9;&#x9;source.CustomerCompany,&#xA;&#x9;&#x9;&#x9;source.CustomerCountry,&#xA;&#x9;&#x9;&#x9;source.CustomerState,&#xA;&#x9;&#x9;&#x9;source.CustomerCity,&#xA;&#x9;&#x9;&#x9;source.CustomerPostalCode,&#xA;&#x9;&#x9;&#x9;source.EmployeeName,&#xA;&#x9;&#x9;&#x9;CAST(@etldate AS Date),&#xA;&#x9;&#x9;   'NEW RECORD'&#xA;&#x9;   )&#xA;&#x9;WHEN NOT MATCHED BY Source THEN&#xA;&#x9;&#x9;UPDATE SET &#xA;&#x9;&#x9;&#x9;Target.RowEndDate= dateadd(day, -1, @etldate )&#xA;&#x9;&#x9;&#x9;,target.RowIsCurrent = 0&#xA;&#x9;&#x9;&#x9;,Target.RowChangeReason  = 'SOFT DELETE'&#xA;&#x9;OUTPUT &#xA;&#x9;&#x9;&#x9;source.CustomerID,&#xA;&#x9;&#x9;&#x9;source.CustomerName,&#xA;&#x9;&#x9;&#x9;source.CustomerCompany,&#xA;&#x9;&#x9;&#x9;source.CustomerCountry,&#xA;&#x9;&#x9;&#x9;source.CustomerState,&#xA;&#x9;&#x9;&#x9;source.CustomerCity,&#xA;&#x9;&#x9;&#x9;source.CustomerPostalCode,&#xA;&#x9;&#x9;&#x9;source.EmployeeName,&#xA;&#x9;&#x9;&#x9;$Action as ActionName   &#xA;) AS Mrg&#xA;WHERE Mrg.ActionName='UPDATE'&#xA;AND [CustomerID] IS NOT NULL;&#xA;&#xA;&#xA;------------------------------------------------&#xA;--  Insert new facts into FactSales&#xA;&#xA;INSERT INTO [ChinookDWSSIS].[dbo].FactSales(&#xA;&#x9;TrackKey,&#xA;&#x9;CustomerKey,&#xA;&#x9;InvoiceDateKey,&#xA;&#x9;InvoiceId,&#xA;&#x9;TrackPrice&#xA;)&#xA;SELECT &#xA;&#x9;t.TrackKey,&#xA;&#x9;c.CustomerKey,&#xA;&#x9;CAST(FORMAT(InvoiceDate,'yyyyMMdd') AS INT),&#xA;&#x9;InvoiceId,&#xA;&#x9;UnitPrice&#xA;FROM &#xA;&#x9;ChinookStagingSSIS.dbo.Sales s&#xA;JOIN ChinookDWSSIS.dbo.DimCustomers c&#xA;    ON c.CustomerId=s.CustomerId and c.RowIsCurrent=1&#xA;JOIN ChinookDWSSIS.dbo.DimTracks t &#xA;    ON t.TrackId=s.TrackId and c.RowIsCurrent=1" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph">
+        <NodeLayout
+          Size="354.4,41.6"
+          Id="Package\SCD Type 2 for Customer &amp; Invoice &amp; InvoiceLine Chinook"
+          TopLeft="180.000000383173,90.2352940385523" />
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>

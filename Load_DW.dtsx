@@ -1,0 +1,2600 @@
+﻿<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="12/11/2023 2:04:14 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="DELL5570"
+  DTS:CreatorName="DELL5570\nikos"
+  DTS:DTSID="{955A2C75-C8C8-4101-8460-CA634E9D5FBB}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="16.0.5396.0"
+  DTS:LocaleID="1032"
+  DTS:ObjectName="Load_DW"
+  DTS:PackageType="5"
+  DTS:VersionBuild="51"
+  DTS:VersionGUID="{A6F75733-7081-4187-8677-9E36DDB68EE5}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{9E2AC37E-3A4F-419C-84F9-D9A4BC685FEC}"
+      DTS:ObjectName="DELL5570.ChinookDWSSIS">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=DELL5570;Initial Catalog=ChinookDWSSIS;Provider=SQLOLEDB.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{9E2AC37E-3A4F-419C-84F9-D9A4BC685FEC}DELL5570.ChinookDWSSIS;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DELL5570.ChinookStagingSSIS]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{DB8FBDD6-E66B-4B46-AF59-7DE7C3148905}"
+      DTS:ObjectName="DELL5570.ChinookStagingSSIS">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=DELL5570;Initial Catalog=ChinookStagingSSIS;Provider=SQLOLEDB.1;Integrated Security=SSPI;Application Name=SSIS-Load_DW-{DB8FBDD6-E66B-4B46-AF59-7DE7C3148905}DELL5570.ChinookStagingSSIS;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables />
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\Create DimDate"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:DelayValidation="True"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{CC9107FF-4D25-442A-B0B3-D0B4D906692C}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Create DimDate"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2022; © 2022 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{9E2AC37E-3A4F-419C-84F9-D9A4BC685FEC}"
+          SQLTask:SqlStatementSource="--Creating the date dimension as a TABLE in MSSQL&#xA;--Provides the UK and USA holidays&#xA;--Specify Start Date and End date here&#xA;--Value of Start Date Must be Less than Your End Date&#xA;&#xA;DECLARE @StartDate DATETIME = '2009-01-01' --Starting value of Date Range&#xA;DECLARE @EndDate DATETIME = '2013-12-31' --End Value of Date Range&#xA;&#xA;--SELECT DATEPART(QQ  , Getdate()) as DayOfMonthValue&#xA;--SELECT CONVERT (char(8),Getdate(),112)&#xA;&#xA;--DATEPART(DW, @CurrentDate)&#xA;--SELECT CONVERT (char(10),Getdate(),103)&#xA;--SELECT DATENAME(DW, '16-aug-2013') AS DayName&#xA;--SELECT DATEPART(DW, '16-aug-2013') AS DayNumber&#xA;&#xA;--SELECT DATEPART(WW, '16-aug-2013') AS WeekOfYear&#xA;&#xA;DROP TABLE IF EXISTS [dbo].[DimDate]&#xA;&#xA;/**********************************************************************************/&#xA;&#xA;CREATE TABLE [dbo].[DimDate]&#xA;    ([DateKey] INT primary key,&#xA;        [Date] DATETIME,&#xA;        [FullDateUK] CHAR(10), -- Date in dd-MM-yyyy format&#xA;        [FullDateUSA] CHAR(10),-- Date in MM-dd-yyyy format&#xA;        [DayOfMonth] VARCHAR(2), -- Field will hold day number of Month&#xA;        [DaySuffix] VARCHAR(4), -- Apply suffix as 1st, 2nd ,3rd etc&#xA;        [DayName] VARCHAR(9), -- Contains name of the day, Sunday, Monday&#xA;        [DayOfWeekUSA] CHAR(1),-- First Day Sunday=1 and Saturday=7&#xA;        [DayOfWeekUK] CHAR(1),-- First Day Monday=1 and Sunday=7&#xA;        [DayOfWeekInMonth] VARCHAR(2), --1st Monday or 2nd Monday in Month&#xA;        [DayOfWeekInYear] VARCHAR(2),&#xA;        [DayOfQuarter] VARCHAR(3),&#xA;        [DayOfYear] VARCHAR(3),&#xA;        [WeekOfMonth] VARCHAR(1),-- Week Number of Month&#xA;        [WeekOfQuarter] VARCHAR(2), --Week Number of the Quarter&#xA;        [WeekOfYear] VARCHAR(2),--Week Number of the Year&#xA;        [Month] VARCHAR(2), --Number of the Month 1 to 12&#xA;        [MonthName] VARCHAR(9),--January, February etc&#xA;        [MonthOfQuarter] VARCHAR(2),-- Month Number belongs to Quarter&#xA;        [Quarter] CHAR(1),&#xA;        [QuarterName] VARCHAR(9),--First,Second..&#xA;        [Year] CHAR(4),-- Year value of Date stored in Row&#xA;        [YearName] CHAR(7), --CY 2012,CY 2013&#xA;        [MonthYear] CHAR(10), --Jan-2013,Feb-2013&#xA;        [MMYYYY] CHAR(6),&#xA;        [FirstDayOfMonth] DATE,&#xA;        [LastDayOfMonth] DATE,&#xA;        [FirstDayOfQuarter] DATE,&#xA;        [LastDayOfQuarter] DATE,&#xA;        [FirstDayOfYear] DATE,&#xA;        [LastDayOfYear] DATE,&#xA;        [IsHolidayUSA] BIT,-- Flag 1=National Holiday, 0-No National Holiday&#xA;        [IsWeekday] BIT,-- 0=Week End ,1=Week Day&#xA;        [HolidayUSA] VARCHAR(50),--Name of Holiday in US&#xA;        [IsHolidayUK] BIT Null, -- Flag 1=National Holiday, 0-No National Holiday&#xA;        [HolidayUK] VARCHAR(50) Null --Name of Holiday in UK&#xA;    )&#xA;;&#xA;&#xA;&#xA;/********************************************************************************************/&#xA;&#xA;&#xA;--Temporary Variables To Hold the Values During Processing of Each Date of Year&#xA;DECLARE&#xA;    @DayOfWeekInMonth INT,&#xA;    @DayOfWeekInYear INT,&#xA;    @DayOfQuarter INT,&#xA;    @WeekOfMonth INT,&#xA;    @CurrentYear INT,&#xA;    @CurrentMonth INT,&#xA;    @CurrentQuarter INT&#xA;&#xA;/*TABLE Data type to store the day of week count for the month and year*/&#xA;DECLARE @DayOfWeek TABLE (DOW INT, MonthCount INT, QuarterCount INT, YearCount INT)&#xA;&#xA;INSERT INTO @DayOfWeek VALUES (1, 0, 0, 0)&#xA;INSERT INTO @DayOfWeek VALUES (2, 0, 0, 0)&#xA;INSERT INTO @DayOfWeek VALUES (3, 0, 0, 0)&#xA;INSERT INTO @DayOfWeek VALUES (4, 0, 0, 0)&#xA;INSERT INTO @DayOfWeek VALUES (5, 0, 0, 0)&#xA;INSERT INTO @DayOfWeek VALUES (6, 0, 0, 0)&#xA;INSERT INTO @DayOfWeek VALUES (7, 0, 0, 0)&#xA;&#xA;--Extract and assign part of Values FROM Current Date to Variable&#xA;&#xA;DECLARE @CurrentDate AS DATETIME = @StartDate&#xA;SET @CurrentMonth = DATEPART(MM, @CurrentDate)&#xA;SET @CurrentYear = DATEPART(YY, @CurrentDate)&#xA;SET @CurrentQuarter = DATEPART(QQ, @CurrentDate)&#xA;&#xA;/********************************************************************************************/&#xA;--Proceed only if Start Date(Current date) is less than End date you specified above&#xA;&#xA;WHILE @CurrentDate &lt;= @EndDate&#xA;BEGIN&#xA;&#xA;/*Begin day of week logic*/&#xA;&#xA;         /*Check for Change in Month of the Current date if Month changed then&#xA;          Change variable value*/&#xA;    IF @CurrentMonth != DATEPART(MM, @CurrentDate)&#xA;    BEGIN&#xA;        UPDATE @DayOfWeek&#xA;        SET MonthCount = 0&#xA;        SET @CurrentMonth = DATEPART(MM, @CurrentDate)&#xA;    END&#xA;&#xA;        --&#xA;        /* Check for Change in Quarter of the Current date if Quarter changed then change&#xA;         Variable value*/&#xA;&#xA;    IF @CurrentQuarter != DATEPART(QQ, @CurrentDate)&#xA;    BEGIN&#xA;        UPDATE @DayOfWeek&#xA;        SET QuarterCount = 0&#xA;        SET @CurrentQuarter = DATEPART(QQ, @CurrentDate)&#xA;    END&#xA;&#xA;        /* Check for Change in Year of the Current date if Year changed then change&#xA;         Variable value*/&#xA;&#xA;&#xA;    IF @CurrentYear != DATEPART(YY, @CurrentDate)&#xA;    BEGIN&#xA;        UPDATE @DayOfWeek&#xA;        SET YearCount = 0&#xA;        SET @CurrentYear = DATEPART(YY, @CurrentDate)&#xA;    END&#xA;&#xA;        -- Set values in TABLE data type created above FROM variables&#xA;&#xA;    UPDATE @DayOfWeek&#xA;    SET&#xA;        MonthCount = MonthCount + 1,&#xA;        QuarterCount = QuarterCount + 1,&#xA;        YearCount = YearCount + 1&#xA;    WHERE DOW = DATEPART(DW, @CurrentDate)&#xA;&#xA;    SELECT&#xA;        @DayOfWeekInMonth = MonthCount,&#xA;        @DayOfQuarter = QuarterCount,&#xA;        @DayOfWeekInYear = YearCount&#xA;    FROM @DayOfWeek&#xA;    WHERE DOW = DATEPART(DW, @CurrentDate)&#xA;&#xA;/*End day of week logic*/&#xA;&#xA;&#xA;/* Populate Your Dimension TABLE with values*/&#xA;&#xA;    INSERT INTO [dbo].[DimDate]&#xA;    SELECT&#xA;&#xA;        CONVERT (char(8),@CurrentDate,112) as DateKey,&#xA;        @CurrentDate AS Date,&#xA;        CONVERT (char(10),@CurrentDate,103) as FullDateUK,&#xA;        CONVERT (char(10),@CurrentDate,101) as FullDateUSA,&#xA;        DATEPART(DD, @CurrentDate) AS DayOfMonth,&#xA;        --Apply Suffix values like 1st, 2nd 3rd etc..&#xA;        CASE&#xA;            WHEN DATEPART(DD,@CurrentDate) IN (11,12,13) THEN CAST(DATEPART(DD,@CurrentDate) AS VARCHAR) + 'th'&#xA;            WHEN RIGHT(DATEPART(DD,@CurrentDate),1) = 1 THEN CAST(DATEPART(DD,@CurrentDate) AS VARCHAR) + 'st'&#xA;            WHEN RIGHT(DATEPART(DD,@CurrentDate),1) = 2 THEN CAST(DATEPART(DD,@CurrentDate) AS VARCHAR) + 'nd'&#xA;            WHEN RIGHT(DATEPART(DD,@CurrentDate),1) = 3 THEN CAST(DATEPART(DD,@CurrentDate) AS VARCHAR) + 'rd'&#xA;            ELSE CAST(DATEPART(DD,@CurrentDate) AS VARCHAR) + 'th'&#xA;            END AS DaySuffix,&#xA;&#xA;        DATENAME(DW, @CurrentDate) AS DayName,&#xA;        DATEPART(DW, @CurrentDate) AS DayOfWeekUSA,&#xA;        -- check for day of week as Per US and change it as per UK format&#xA;        CASE DATEPART(DW, @CurrentDate)&#xA;            WHEN 1 THEN 7&#xA;            WHEN 2 THEN 1&#xA;            WHEN 3 THEN 2&#xA;            WHEN 4 THEN 3&#xA;            WHEN 5 THEN 4&#xA;            WHEN 6 THEN 5&#xA;            WHEN 7 THEN 6&#xA;            END&#xA;            AS DayOfWeekUK,&#xA;&#xA;        @DayOfWeekInMonth AS DayOfWeekInMonth,&#xA;        @DayOfWeekInYear AS DayOfWeekInYear,&#xA;        @DayOfQuarter AS DayOfQuarter,&#xA;        DATEPART(DY, @CurrentDate) AS DayOfYear,&#xA;        DATEPART(WW, @CurrentDate) + 1 - DATEPART(WW, CONVERT(VARCHAR, DATEPART(MM, @CurrentDate)) + '/1/' + CONVERT(VARCHAR, DATEPART(YY, @CurrentDate))) AS WeekOfMonth,&#xA;        (DATEDIFF(DD, DATEADD(QQ, DATEDIFF(QQ, 0, @CurrentDate), 0), @CurrentDate) / 7) + 1 AS WeekOfQuarter,&#xA;        DATEPART(WW, @CurrentDate) AS WeekOfYear,&#xA;        DATEPART(MM, @CurrentDate) AS Month,&#xA;        DATENAME(MM, @CurrentDate) AS MonthName,&#xA;        CASE&#xA;            WHEN DATEPART(MM, @CurrentDate) IN (1, 4, 7, 10) THEN 1&#xA;            WHEN DATEPART(MM, @CurrentDate) IN (2, 5, 8, 11) THEN 2&#xA;            WHEN DATEPART(MM, @CurrentDate) IN (3, 6, 9, 12) THEN 3&#xA;            END AS MonthOfQuarter,&#xA;        DATEPART(QQ, @CurrentDate) AS Quarter,&#xA;        CASE DATEPART(QQ, @CurrentDate)&#xA;            WHEN 1 THEN 'First'&#xA;            WHEN 2 THEN 'Second'&#xA;            WHEN 3 THEN 'Third'&#xA;            WHEN 4 THEN 'Fourth'&#xA;            END AS QuarterName,&#xA;        DATEPART(YEAR, @CurrentDate) AS Year,&#xA;        'CY ' + CONVERT(VARCHAR, DATEPART(YEAR, @CurrentDate)) AS YearName,&#xA;        LEFT(DATENAME(MM, @CurrentDate), 3) + '-' + CONVERT(VARCHAR, DATEPART(YY, @CurrentDate)) AS MonthYear,&#xA;        RIGHT('0' + CONVERT(VARCHAR, DATEPART(MM, @CurrentDate)),2) + CONVERT(VARCHAR, DATEPART(YY, @CurrentDate)) AS MMYYYY,&#xA;        CONVERT(DATETIME, CONVERT(DATE, DATEADD(DD, - (DATEPART(DD, @CurrentDate) - 1), @CurrentDate))) AS FirstDayOfMonth,&#xA;        CONVERT(DATETIME, CONVERT(DATE, DATEADD(DD, - (DATEPART(DD, (DATEADD(MM, 1, @CurrentDate)))), DATEADD(MM, 1, @CurrentDate)))) AS LastDayOfMonth,&#xA;        DATEADD(QQ, DATEDIFF(QQ, 0, @CurrentDate), 0) AS FirstDayOfQuarter,&#xA;        DATEADD(QQ, DATEDIFF(QQ, -1, @CurrentDate), -1) AS LastDayOfQuarter,&#xA;        CONVERT(DATETIME, '01/01/' + CONVERT(VARCHAR, DATEPART(YY, @CurrentDate))) AS FirstDayOfYear,&#xA;        CONVERT(DATETIME, '12/31/' + CONVERT(VARCHAR, DATEPART(YY, @CurrentDate))) AS LastDayOfYear,&#xA;        NULL AS IsHolidayUSA,&#xA;        CASE DATEPART(DW, @CurrentDate)&#xA;            WHEN 1 THEN 0&#xA;            WHEN 2 THEN 1&#xA;            WHEN 3 THEN 1&#xA;            WHEN 4 THEN 1&#xA;            WHEN 5 THEN 1&#xA;            WHEN 6 THEN 1&#xA;            WHEN 7 THEN 0&#xA;            END AS IsWeekday,&#xA;        NULL AS HolidayUSA, Null, Null&#xA;&#xA;    SET @CurrentDate = DATEADD(DD, 1, @CurrentDate)&#xA;END&#xA;&#xA;&#xA;&#xA;&#xA;/* Add HOLIDAYS UK */&#xA;/* For Easter, you should do this for every year INDIVIDUALLY */&#xA;/* For now we assume that these dates are always on the same date */&#xA;&#xA;-- Good Friday  April 18&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUK = 'Good Friday'&#xA;    WHERE [Month] = 4 AND [DayOfMonth]  = 18&#xA;-- Easter Monday  April 21&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUK = 'Easter Monday'&#xA;    WHERE [Month] = 4 AND [DayOfMonth]  = 21&#xA;-- Early May Bank Holiday   May 5&#xA;   UPDATE [dbo].[DimDate]&#xA;        SET HolidayUK = 'Early May Bank Holiday'&#xA;    WHERE [Month] = 5 AND [DayOfMonth]  = 5&#xA;-- Spring Bank Holiday  May 26&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUK = 'Spring Bank Holiday'&#xA;    WHERE [Month] = 5 AND [DayOfMonth]  = 26&#xA;-- Summer Bank Holiday  August 25&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUK = 'Summer Bank Holiday'&#xA;    WHERE [Month] = 8 AND [DayOfMonth]  = 25&#xA;-- Boxing Day  December 26&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUK = 'Boxing Day'&#xA;    WHERE [Month] = 12 AND [DayOfMonth]  = 26&#xA;--CHRISTMAS&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUK = 'Christmas Day'&#xA;    WHERE [Month] = 12 AND [DayOfMonth]  = 25&#xA;--New Years Day&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUK  = 'New Year''s Day'&#xA;    WHERE [Month] = 1 AND [DayOfMonth] = 1&#xA;&#xA;    UPDATE [dbo].[DimDate]&#xA;    SET IsHolidayUK = CASE WHEN HolidayUK IS NULL THEN 0 WHEN HolidayUK IS NOT NULL THEN 1 END&#xA;&#xA;&#xA;    /*Add HOLIDAYS USA*/&#xA;    /*THANKSGIVING - Fourth THURSDAY in November*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Thanksgiving Day'&#xA;    WHERE&#xA;        [Month] = 11&#xA;        AND [DayOfWeekUSA] = 'Thursday'&#xA;        AND DayOfWeekInMonth = 4&#xA;&#xA;    /*CHRISTMAS*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Christmas Day'&#xA;&#xA;    WHERE [Month] = 12 AND [DayOfMonth]  = 25&#xA;&#xA;    /*4th of July*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Independance Day'&#xA;    WHERE [Month] = 7 AND [DayOfMonth] = 4&#xA;&#xA;    /*New Years Day*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'New Year''s Day'&#xA;    WHERE [Month] = 1 AND [DayOfMonth] = 1&#xA;&#xA;    /*Memorial Day - Last Monday in May*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Memorial Day'&#xA;    FROM [dbo].[DimDate]&#xA;    WHERE DateKey IN&#xA;        (&#xA;        SELECT&#xA;            MAX(DateKey)&#xA;        FROM [dbo].[DimDate]&#xA;        WHERE&#xA;            [MonthName] = 'May'&#xA;            AND [DayOfWeekUSA]  = 'Monday'&#xA;        GROUP BY&#xA;            [Year],&#xA;            [Month]&#xA;        )&#xA;&#xA;    /*Labor Day - First Monday in September*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Labor Day'&#xA;    FROM [dbo].[DimDate]&#xA;    WHERE DateKey IN&#xA;        (&#xA;        SELECT&#xA;            MIN(DateKey)&#xA;        FROM [dbo].[DimDate]&#xA;        WHERE&#xA;            [MonthName] = 'September'&#xA;            AND [DayOfWeekUSA] = 'Monday'&#xA;        GROUP BY&#xA;            [Year],&#xA;            [Month]&#xA;        )&#xA;&#xA;    /*Valentine's Day*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Valentine''s Day'&#xA;    WHERE&#xA;        [Month] = 2&#xA;        AND [DayOfMonth] = 14&#xA;&#xA;    /*Saint Patrick's Day*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Saint Patrick''s Day'&#xA;    WHERE&#xA;        [Month] = 3&#xA;        AND [DayOfMonth] = 17&#xA;&#xA;    /*Martin Luthor King Day - Third Monday in January starting in 1983*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Martin Luthor King Jr Day'&#xA;    WHERE&#xA;        [Month] = 1&#xA;        AND [DayOfWeekUSA]  = 'Monday'&#xA;        AND [Year] &gt;= 1983&#xA;        AND DayOfWeekInMonth = 3&#xA;&#xA;    /*President's Day - Third Monday in February*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'President''s Day'&#xA;    WHERE&#xA;        [Month] = 2&#xA;        AND [DayOfWeekUSA] = 'Monday'&#xA;        AND DayOfWeekInMonth = 3&#xA;&#xA;    /*Mother's Day - Second Sunday of May*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Mother''s Day'&#xA;    WHERE&#xA;        [Month] = 5&#xA;        AND [DayOfWeekUSA] = 'Sunday'&#xA;        AND DayOfWeekInMonth = 2&#xA;&#xA;    /*Father's Day - Third Sunday of June*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Father''s Day'&#xA;    WHERE&#xA;        [Month] = 6&#xA;        AND [DayOfWeekUSA] = 'Sunday'&#xA;        AND DayOfWeekInMonth = 3&#xA;&#xA;    /*Halloween 10/31*/&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET HolidayUSA = 'Halloween'&#xA;    WHERE&#xA;        [Month] = 10&#xA;        AND [DayOfMonth] = 31&#xA;&#xA;    /*Election Day - The first Tuesday after the first Monday in November*/&#xA;    BEGIN&#xA;        DECLARE @Holidays TABLE (ID INT IDENTITY(1,1), DateID INT, Week TINYINT, YEAR CHAR(4), DAY CHAR(2))&#xA;&#xA;        INSERT INTO @Holidays(DateID, [Year],[Day])&#xA;        SELECT&#xA;            DateKey,&#xA;            [Year],&#xA;            [DayOfMonth]&#xA;        FROM [dbo].[DimDate]&#xA;        WHERE&#xA;            [Month] = 11&#xA;            AND [DayOfWeekUSA] = 'Monday'&#xA;        ORDER BY&#xA;            YEAR,&#xA;            DayOfMonth&#xA;&#xA;        DECLARE @CNTR INT, @POS INT, @STARTYEAR INT, @ENDYEAR INT, @MINDAY INT&#xA;&#xA;        SELECT&#xA;            @CURRENTYEAR = MIN([Year])&#xA;            , @STARTYEAR = MIN([Year])&#xA;            , @ENDYEAR = MAX([Year])&#xA;        FROM @Holidays&#xA;&#xA;        WHILE @CURRENTYEAR &lt;= @ENDYEAR&#xA;        BEGIN&#xA;            SELECT @CNTR = COUNT([Year])&#xA;            FROM @Holidays&#xA;            WHERE [Year] = @CURRENTYEAR&#xA;&#xA;            SET @POS = 1&#xA;&#xA;            WHILE @POS &lt;= @CNTR&#xA;            BEGIN&#xA;                SELECT @MINDAY = MIN(DAY)&#xA;                FROM @Holidays&#xA;                WHERE&#xA;                    [Year] = @CURRENTYEAR&#xA;                    AND [Week] IS NULL&#xA;&#xA;                UPDATE @Holidays&#xA;                    SET [Week] = @POS&#xA;                WHERE&#xA;                    [Year] = @CURRENTYEAR&#xA;                    AND [Day] = @MINDAY&#xA;&#xA;                SELECT @POS = @POS + 1&#xA;            END&#xA;&#xA;            SELECT @CURRENTYEAR = @CURRENTYEAR + 1&#xA;        END&#xA;&#xA;        UPDATE [dbo].[DimDate]&#xA;            SET HolidayUSA  = 'Election Day'&#xA;        FROM [dbo].[DimDate] DT&#xA;            JOIN @Holidays HL ON (HL.DateID + 1) = DT.DateKey&#xA;        WHERE&#xA;            [Week] = 1&#xA;    END&#xA;&#xA;    UPDATE [dbo].[DimDate]&#xA;        SET IsHolidayUSA = CASE WHEN HolidayUSA  IS NULL THEN 0 WHEN HolidayUSA  IS NOT NULL THEN 1 END" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\Create DW Tables"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{ea8d15ba-218d-492f-8bc2-e349dff00ba6}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Create DW Tables"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2022; © 2022 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{9E2AC37E-3A4F-419C-84F9-D9A4BC685FEC}"
+          SQLTask:SqlStatementSource="DROP TABLE IF EXISTS FactSales&#xA;DROP TABLE IF EXISTS DimCustomers&#xA;DROP TABLE IF EXISTS DimTracks&#xA;DROP TABLE IF EXISTS DimPlaylists&#xA;&#xA;--1. Create FACT table for FactSales&#xA;CREATE TABLE FactSales(&#xA;  TrackKey INT NOT NULL,&#xA;  CustomerKey INT NOT NULL,&#xA;  InvoiceDateKey INT NOT NULL,&#xA;  InvoiceId INT NOT NULL,&#xA;  TrackPrice FLOAT NOT NULL&#xA;);&#xA;&#xA;--2. Create DIMENSION table for DimCustomers&#xA;CREATE TABLE DimCustomers(&#xA;  CustomerKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY,&#xA;  CustomerId INT NOT NULL,&#xA;  CustomerName NVARCHAR(61) NOT NULL,&#xA;  CustomerCompany NVARCHAR(80) NULL,&#xA;  CustomerCountry NVARCHAR(40) NULL,&#xA;  CustomerState NVARCHAR(40) NULL,&#xA;  CustomerCity NVARCHAR(40) NULL,&#xA;  CustomerPostalCode NVARCHAR(10) NULL,&#xA;  EmployeeName NVARCHAR(41) NOT NULL,&#xA;  RowIsCurrent INT DEFAULT 1 NOT NULL,&#xA;  RowStartDate DATE DEFAULT '1899-12-31' NOT NULL,&#xA;  RowEndDate DATE DEFAULT '9999-12-31' NOT NULL,&#xA;  RowChangeReason VARCHAR(200) NULL&#xA;);&#xA;&#xA;--3. Create DIMENSION table for DimTracks&#xA;CREATE TABLE DimTracks(&#xA;  TrackKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY,&#xA;  TrackId INT NOT NULL,&#xA;  TrackName NVARCHAR(200) NOT NULL,&#xA;  TrackComposer NVARCHAR(220) NULL,&#xA;  TrackLength INT NOT NULL,&#xA;  AlbumTitle NVARCHAR(160) NOT NULL,&#xA;  ArtistName NVARCHAR(120) NULL,&#xA;  GenreName NVARCHAR(120)  NULL,&#xA;  RowIsCurrent INT DEFAULT 1 NOT NULL,&#xA;  RowStartDate DATE DEFAULT '1899-12-31' NOT NULL,&#xA;  RowEndDate DATE DEFAULT '9999-12-31' NOT NULL,&#xA;  RowChangeReason VARCHAR(200) NULL&#xA;);" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\Load DimCustomers"
+      DTS:CreationName="Microsoft.Pipeline"
+      DTS:DelayValidation="True"
+      DTS:Description="Data Flow Task"
+      DTS:DTSID="{45598c11-ffdd-4dcb-8503-bc2d6ac905c9}"
+      DTS:ExecutableType="Microsoft.Pipeline"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Load DimCustomers"
+      DTS:TaskContact="Performs high-performance data extraction, transformation and loading;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <pipeline
+          version="1">
+          <components>
+            <component
+              refId="Package\Load DimCustomers\Create FullName"
+              componentClassID="Microsoft.DerivedColumn"
+              contactInfo="Derived Column;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;0"
+              description="Creates new column values by applying expressions to transformation input columns. Create new columns or overwrite existing ones. For example, concatenate the values from the 'first name' and 'last name' column to make a 'full name' column."
+              name="Create FullName"
+              usesDispositions="true">
+              <inputs>
+                <input
+                  refId="Package\Load DimCustomers\Create FullName.Inputs[Derived Column Input]"
+                  description="Input to the Derived Column Transformation"
+                  name="Derived Column Input">
+                  <inputColumns>
+                    <inputColumn
+                      refId="Package\Load DimCustomers\Create FullName.Inputs[Derived Column Input].Columns[CustomerFirstName]"
+                      cachedDataType="wstr"
+                      cachedLength="40"
+                      cachedName="CustomerFirstName"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerFirstName]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\Create FullName.Inputs[Derived Column Input].Columns[CustomerLastName]"
+                      cachedDataType="wstr"
+                      cachedLength="20"
+                      cachedName="CustomerLastName"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerLastName]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\Create FullName.Inputs[Derived Column Input].Columns[EmployeeFirstName]"
+                      cachedDataType="wstr"
+                      cachedLength="20"
+                      cachedName="EmployeeFirstName"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[EmployeeFirstName]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\Create FullName.Inputs[Derived Column Input].Columns[EmployeeLastName]"
+                      cachedDataType="wstr"
+                      cachedLength="20"
+                      cachedName="EmployeeLastName"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[EmployeeLastName]" />
+                  </inputColumns>
+                  <externalMetadataColumns />
+                </input>
+              </inputs>
+              <outputs>
+                <output
+                  refId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Output]"
+                  description="Default Output of the Derived Column Transformation"
+                  exclusionGroup="1"
+                  name="Derived Column Output"
+                  synchronousInputId="Package\Load DimCustomers\Create FullName.Inputs[Derived Column Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Output].Columns[CustomerName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Computation"
+                      errorRowDisposition="FailComponent"
+                      length="61"
+                      lineageId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Output].Columns[CustomerName]"
+                      name="CustomerName"
+                      truncationRowDisposition="FailComponent">
+                      <properties>
+                        <property
+                          containsID="true"
+                          dataType="System.String"
+                          description="Derived Column Expression"
+                          name="Expression">#{Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerFirstName]} + " " + #{Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerLastName]}</property>
+                        <property
+                          containsID="true"
+                          dataType="System.String"
+                          description="Derived Column Friendly Expression"
+                          expressionType="Notify"
+                          name="FriendlyExpression">CustomerFirstName + " " + CustomerLastName</property>
+                      </properties>
+                    </outputColumn>
+                    <outputColumn
+                      refId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Output].Columns[EmployeeName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Computation"
+                      errorRowDisposition="FailComponent"
+                      length="41"
+                      lineageId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Output].Columns[EmployeeName]"
+                      name="EmployeeName"
+                      truncationRowDisposition="FailComponent">
+                      <properties>
+                        <property
+                          containsID="true"
+                          dataType="System.String"
+                          description="Derived Column Expression"
+                          name="Expression">#{Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[EmployeeFirstName]} + " " + #{Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[EmployeeLastName]}</property>
+                        <property
+                          containsID="true"
+                          dataType="System.String"
+                          description="Derived Column Friendly Expression"
+                          expressionType="Notify"
+                          name="FriendlyExpression">EmployeeFirstName + " " + EmployeeLastName</property>
+                      </properties>
+                    </outputColumn>
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+                <output
+                  refId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Error Output]"
+                  description="Error Output of the Derived Column Transformation"
+                  exclusionGroup="1"
+                  isErrorOut="true"
+                  name="Derived Column Error Output"
+                  synchronousInputId="Package\Load DimCustomers\Create FullName.Inputs[Derived Column Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+            <component
+              refId="Package\Load DimCustomers\CustomersStagingSSIS"
+              componentClassID="Microsoft.OLEDBSource"
+              contactInfo="OLE DB Source;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;7"
+              description="OLE DB Source"
+              name="CustomersStagingSSIS"
+              usesDispositions="true"
+              version="7">
+              <properties>
+                <property
+                  dataType="System.Int32"
+                  description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                  name="CommandTimeout">0</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the name of the database object used to open a rowset."
+                  name="OpenRowset">[dbo].[Customers]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the variable that contains the name of the database object used to open a rowset."
+                  name="OpenRowsetVariable"></property>
+                <property
+                  dataType="System.String"
+                  description="The SQL command to be executed."
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                <property
+                  dataType="System.String"
+                  description="The variable that contains the SQL command to be executed."
+                  name="SqlCommandVariable"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1253</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Forces the use of the DefaultCodePage property value when describing character data."
+                  name="AlwaysUseDefaultCodePage">false</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the mode used to access the database."
+                  name="AccessMode"
+                  typeConverter="AccessMode">0</property>
+                <property
+                  dataType="System.String"
+                  description="The mappings between the parameters in the SQL command and variables."
+                  name="ParameterMapping"></property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\Load DimCustomers\CustomersStagingSSIS.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[DELL5570.ChinookStagingSSIS]"
+                  connectionManagerRefId="Package.ConnectionManagers[DELL5570.ChinookStagingSSIS]"
+                  description="The OLE DB runtime connection used to access the database."
+                  name="OleDbConnection" />
+              </connections>
+              <outputs>
+                <output
+                  refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output]"
+                  name="OLE DB Source Output">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerId]"
+                      dataType="i4"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerId]"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerId]"
+                      name="CustomerId"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerFirstName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerFirstName]"
+                      length="40"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerFirstName]"
+                      name="CustomerFirstName"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerLastName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerLastName]"
+                      length="20"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerLastName]"
+                      name="CustomerLastName"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerCompany]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerCompany]"
+                      length="80"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerCompany]"
+                      name="CustomerCompany"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerCountry]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerCountry]"
+                      length="40"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerCountry]"
+                      name="CustomerCountry"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerState]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerState]"
+                      length="40"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerState]"
+                      name="CustomerState"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerCity]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerCity]"
+                      length="40"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerCity]"
+                      name="CustomerCity"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerPostalCode]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerPostalCode]"
+                      length="10"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerPostalCode]"
+                      name="CustomerPostalCode"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[EmployeeFirstName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[EmployeeFirstName]"
+                      length="20"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[EmployeeFirstName]"
+                      name="EmployeeFirstName"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[EmployeeLastName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[EmployeeLastName]"
+                      length="20"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[EmployeeLastName]"
+                      name="EmployeeLastName"
+                      truncationRowDisposition="FailComponent" />
+                  </outputColumns>
+                  <externalMetadataColumns
+                    isUsed="True">
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerId]"
+                      dataType="i4"
+                      name="CustomerId" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerFirstName]"
+                      dataType="wstr"
+                      length="40"
+                      name="CustomerFirstName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerLastName]"
+                      dataType="wstr"
+                      length="20"
+                      name="CustomerLastName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerCompany]"
+                      dataType="wstr"
+                      length="80"
+                      name="CustomerCompany" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerCountry]"
+                      dataType="wstr"
+                      length="40"
+                      name="CustomerCountry" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerState]"
+                      dataType="wstr"
+                      length="40"
+                      name="CustomerState" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerCity]"
+                      dataType="wstr"
+                      length="40"
+                      name="CustomerCity" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerPostalCode]"
+                      dataType="wstr"
+                      length="10"
+                      name="CustomerPostalCode" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[EmployeeFirstName]"
+                      dataType="wstr"
+                      length="20"
+                      name="EmployeeFirstName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[EmployeeLastName]"
+                      dataType="wstr"
+                      length="20"
+                      name="EmployeeLastName" />
+                  </externalMetadataColumns>
+                </output>
+                <output
+                  refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output]"
+                  isErrorOut="true"
+                  name="OLE DB Source Error Output">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerId]"
+                      dataType="i4"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerId]"
+                      name="CustomerId" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerFirstName]"
+                      dataType="wstr"
+                      length="40"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerFirstName]"
+                      name="CustomerFirstName" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerLastName]"
+                      dataType="wstr"
+                      length="20"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerLastName]"
+                      name="CustomerLastName" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerCompany]"
+                      dataType="wstr"
+                      length="80"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerCompany]"
+                      name="CustomerCompany" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerCountry]"
+                      dataType="wstr"
+                      length="40"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerCountry]"
+                      name="CustomerCountry" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerState]"
+                      dataType="wstr"
+                      length="40"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerState]"
+                      name="CustomerState" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerCity]"
+                      dataType="wstr"
+                      length="40"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerCity]"
+                      name="CustomerCity" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerPostalCode]"
+                      dataType="wstr"
+                      length="10"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerPostalCode]"
+                      name="CustomerPostalCode" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[EmployeeFirstName]"
+                      dataType="wstr"
+                      length="20"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[EmployeeFirstName]"
+                      name="EmployeeFirstName" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[EmployeeLastName]"
+                      dataType="wstr"
+                      length="20"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[EmployeeLastName]"
+                      name="EmployeeLastName" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+            <component
+              refId="Package\Load DimCustomers\DimCustomersDWSSIS"
+              componentClassID="Microsoft.OLEDBDestination"
+              contactInfo="OLE DB Destination;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;4"
+              description="OLE DB Destination"
+              name="DimCustomersDWSSIS"
+              usesDispositions="true"
+              version="4">
+              <properties>
+                <property
+                  dataType="System.Int32"
+                  description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                  name="CommandTimeout">0</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the name of the database object used to open a rowset."
+                  name="OpenRowset">[dbo].[DimCustomers]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the variable that contains the name of the database object used to open a rowset."
+                  name="OpenRowsetVariable"></property>
+                <property
+                  dataType="System.String"
+                  description="The SQL command to be executed."
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1253</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Forces the use of the DefaultCodePage property value when describing character data."
+                  name="AlwaysUseDefaultCodePage">false</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the mode used to access the database."
+                  name="AccessMode"
+                  typeConverter="AccessMode">0</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Indicates whether the values supplied for identity columns will be copied to the destination. If false, values for identity columns will be auto-generated at the destination. Applies only if fast load is turned on."
+                  name="FastLoadKeepIdentity">false</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Indicates whether the columns containing null will have null inserted in the destination. If false, columns containing null will have their default values inserted at the destination. Applies only if fast load is turned on."
+                  name="FastLoadKeepNulls">false</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies options to be used with fast load.  Applies only if fast load is turned on."
+                  name="FastLoadOptions"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies when commits are issued during data insertion.  A value of 0 specifies that one commit will be issued at the end of data insertion.  Applies only if fast load is turned on."
+                  name="FastLoadMaxInsertCommitSize">2147483647</property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\Load DimCustomers\DimCustomersDWSSIS.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  connectionManagerRefId="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  description="The OLE DB runtime connection used to access the database."
+                  name="OleDbConnection" />
+              </connections>
+              <inputs>
+                <input
+                  refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input]"
+                  errorOrTruncationOperation="Insert"
+                  errorRowDisposition="FailComponent"
+                  hasSideEffects="true"
+                  name="OLE DB Destination Input">
+                  <inputColumns>
+                    <inputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].Columns[CustomerId]"
+                      cachedDataType="i4"
+                      cachedName="CustomerId"
+                      externalMetadataColumnId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerId]"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerId]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].Columns[CustomerCompany]"
+                      cachedDataType="wstr"
+                      cachedLength="80"
+                      cachedName="CustomerCompany"
+                      externalMetadataColumnId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerCompany]"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerCompany]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].Columns[CustomerCountry]"
+                      cachedDataType="wstr"
+                      cachedLength="40"
+                      cachedName="CustomerCountry"
+                      externalMetadataColumnId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerCountry]"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerCountry]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].Columns[CustomerState]"
+                      cachedDataType="wstr"
+                      cachedLength="40"
+                      cachedName="CustomerState"
+                      externalMetadataColumnId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerState]"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerState]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].Columns[CustomerCity]"
+                      cachedDataType="wstr"
+                      cachedLength="40"
+                      cachedName="CustomerCity"
+                      externalMetadataColumnId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerCity]"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerCity]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].Columns[CustomerPostalCode]"
+                      cachedDataType="wstr"
+                      cachedLength="10"
+                      cachedName="CustomerPostalCode"
+                      externalMetadataColumnId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerPostalCode]"
+                      lineageId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerPostalCode]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].Columns[CustomerName]"
+                      cachedDataType="wstr"
+                      cachedLength="61"
+                      cachedName="CustomerName"
+                      externalMetadataColumnId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerName]"
+                      lineageId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Output].Columns[CustomerName]" />
+                    <inputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].Columns[EmployeeName]"
+                      cachedDataType="wstr"
+                      cachedLength="41"
+                      cachedName="EmployeeName"
+                      externalMetadataColumnId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[EmployeeName]"
+                      lineageId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Output].Columns[EmployeeName]" />
+                  </inputColumns>
+                  <externalMetadataColumns
+                    isUsed="True">
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerKey]"
+                      dataType="i4"
+                      name="CustomerKey" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerId]"
+                      dataType="i4"
+                      name="CustomerId" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerName]"
+                      dataType="wstr"
+                      length="61"
+                      name="CustomerName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerCompany]"
+                      dataType="wstr"
+                      length="80"
+                      name="CustomerCompany" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerCountry]"
+                      dataType="wstr"
+                      length="40"
+                      name="CustomerCountry" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerState]"
+                      dataType="wstr"
+                      length="40"
+                      name="CustomerState" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerCity]"
+                      dataType="wstr"
+                      length="40"
+                      name="CustomerCity" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerPostalCode]"
+                      dataType="wstr"
+                      length="10"
+                      name="CustomerPostalCode" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[EmployeeName]"
+                      dataType="wstr"
+                      length="41"
+                      name="EmployeeName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[RowIsCurrent]"
+                      dataType="i4"
+                      name="RowIsCurrent" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[RowStartDate]"
+                      dataType="wstr"
+                      length="10"
+                      name="RowStartDate" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[RowEndDate]"
+                      dataType="wstr"
+                      length="10"
+                      name="RowEndDate" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[RowChangeReason]"
+                      codePage="1253"
+                      dataType="str"
+                      length="200"
+                      name="RowChangeReason" />
+                  </externalMetadataColumns>
+                </input>
+              </inputs>
+              <outputs>
+                <output
+                  refId="Package\Load DimCustomers\DimCustomersDWSSIS.Outputs[OLE DB Destination Error Output]"
+                  exclusionGroup="1"
+                  isErrorOut="true"
+                  name="OLE DB Destination Error Output"
+                  synchronousInputId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load DimCustomers\DimCustomersDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load DimCustomers\DimCustomersDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load DimCustomers\DimCustomersDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+          </components>
+          <paths>
+            <path
+              refId="Package\Load DimCustomers.Paths[Derived Column Output]"
+              endId="Package\Load DimCustomers\DimCustomersDWSSIS.Inputs[OLE DB Destination Input]"
+              name="Derived Column Output"
+              startId="Package\Load DimCustomers\Create FullName.Outputs[Derived Column Output]" />
+            <path
+              refId="Package\Load DimCustomers.Paths[OLE DB Source Output]"
+              endId="Package\Load DimCustomers\Create FullName.Inputs[Derived Column Input]"
+              name="OLE DB Source Output"
+              startId="Package\Load DimCustomers\CustomersStagingSSIS.Outputs[OLE DB Source Output]" />
+          </paths>
+        </pipeline>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\Load DimTracks"
+      DTS:CreationName="Microsoft.Pipeline"
+      DTS:DelayValidation="True"
+      DTS:Description="Data Flow Task"
+      DTS:DTSID="{b1830285-7d89-45ba-8f03-ee04cf5eb718}"
+      DTS:ExecutableType="Microsoft.Pipeline"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Load DimTracks"
+      DTS:TaskContact="Performs high-performance data extraction, transformation and loading;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <pipeline
+          version="1">
+          <components>
+            <component
+              refId="Package\Load DimTracks\DimTracksDWSSIS"
+              componentClassID="Microsoft.OLEDBDestination"
+              contactInfo="OLE DB Destination;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;4"
+              description="OLE DB Destination"
+              name="DimTracksDWSSIS"
+              usesDispositions="true"
+              version="4">
+              <properties>
+                <property
+                  dataType="System.Int32"
+                  description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                  name="CommandTimeout">0</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the name of the database object used to open a rowset."
+                  name="OpenRowset">[dbo].[DimTracks]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the variable that contains the name of the database object used to open a rowset."
+                  name="OpenRowsetVariable"></property>
+                <property
+                  dataType="System.String"
+                  description="The SQL command to be executed."
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1253</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Forces the use of the DefaultCodePage property value when describing character data."
+                  name="AlwaysUseDefaultCodePage">false</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the mode used to access the database."
+                  name="AccessMode"
+                  typeConverter="AccessMode">0</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Indicates whether the values supplied for identity columns will be copied to the destination. If false, values for identity columns will be auto-generated at the destination. Applies only if fast load is turned on."
+                  name="FastLoadKeepIdentity">false</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Indicates whether the columns containing null will have null inserted in the destination. If false, columns containing null will have their default values inserted at the destination. Applies only if fast load is turned on."
+                  name="FastLoadKeepNulls">false</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies options to be used with fast load.  Applies only if fast load is turned on."
+                  name="FastLoadOptions"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies when commits are issued during data insertion.  A value of 0 specifies that one commit will be issued at the end of data insertion.  Applies only if fast load is turned on."
+                  name="FastLoadMaxInsertCommitSize">2147483647</property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\Load DimTracks\DimTracksDWSSIS.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  connectionManagerRefId="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  description="The OLE DB runtime connection used to access the database."
+                  name="OleDbConnection" />
+              </connections>
+              <inputs>
+                <input
+                  refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input]"
+                  errorOrTruncationOperation="Insert"
+                  errorRowDisposition="FailComponent"
+                  hasSideEffects="true"
+                  name="OLE DB Destination Input">
+                  <inputColumns>
+                    <inputColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].Columns[TrackId]"
+                      cachedDataType="i4"
+                      cachedName="TrackId"
+                      externalMetadataColumnId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackId]"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackId]" />
+                    <inputColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].Columns[TrackName]"
+                      cachedDataType="wstr"
+                      cachedLength="200"
+                      cachedName="TrackName"
+                      externalMetadataColumnId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackName]"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackName]" />
+                    <inputColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].Columns[TrackComposer]"
+                      cachedDataType="wstr"
+                      cachedLength="220"
+                      cachedName="TrackComposer"
+                      externalMetadataColumnId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackComposer]"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackComposer]" />
+                    <inputColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].Columns[AlbumTitle]"
+                      cachedDataType="wstr"
+                      cachedLength="160"
+                      cachedName="AlbumTitle"
+                      externalMetadataColumnId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[AlbumTitle]"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[AlbumTitle]" />
+                    <inputColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].Columns[GenreName]"
+                      cachedDataType="wstr"
+                      cachedLength="120"
+                      cachedName="GenreName"
+                      externalMetadataColumnId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[GenreName]"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[GenreName]" />
+                    <inputColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].Columns[AristName]"
+                      cachedDataType="wstr"
+                      cachedLength="120"
+                      cachedName="AristName"
+                      externalMetadataColumnId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[ArtistName]"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[AristName]" />
+                    <inputColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].Columns[TrackMillisec]"
+                      cachedDataType="i4"
+                      cachedName="TrackMillisec"
+                      externalMetadataColumnId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackLength]"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackMillisec]" />
+                  </inputColumns>
+                  <externalMetadataColumns
+                    isUsed="True">
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackKey]"
+                      dataType="i4"
+                      name="TrackKey" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackId]"
+                      dataType="i4"
+                      name="TrackId" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackName]"
+                      dataType="wstr"
+                      length="200"
+                      name="TrackName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackComposer]"
+                      dataType="wstr"
+                      length="220"
+                      name="TrackComposer" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackLength]"
+                      dataType="i4"
+                      name="TrackLength" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[AlbumTitle]"
+                      dataType="wstr"
+                      length="160"
+                      name="AlbumTitle" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[ArtistName]"
+                      dataType="wstr"
+                      length="120"
+                      name="ArtistName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[GenreName]"
+                      dataType="wstr"
+                      length="120"
+                      name="GenreName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[RowIsCurrent]"
+                      dataType="i4"
+                      name="RowIsCurrent" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[RowStartDate]"
+                      dataType="wstr"
+                      length="10"
+                      name="RowStartDate" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[RowEndDate]"
+                      dataType="wstr"
+                      length="10"
+                      name="RowEndDate" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[RowChangeReason]"
+                      codePage="1253"
+                      dataType="str"
+                      length="200"
+                      name="RowChangeReason" />
+                  </externalMetadataColumns>
+                </input>
+              </inputs>
+              <outputs>
+                <output
+                  refId="Package\Load DimTracks\DimTracksDWSSIS.Outputs[OLE DB Destination Error Output]"
+                  exclusionGroup="1"
+                  isErrorOut="true"
+                  name="OLE DB Destination Error Output"
+                  synchronousInputId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load DimTracks\DimTracksDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\DimTracksDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load DimTracks\DimTracksDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+            <component
+              refId="Package\Load DimTracks\TracksStagingSSIS"
+              componentClassID="Microsoft.OLEDBSource"
+              contactInfo="OLE DB Source;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;7"
+              description="OLE DB Source"
+              name="TracksStagingSSIS"
+              usesDispositions="true"
+              version="7">
+              <properties>
+                <property
+                  dataType="System.Int32"
+                  description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                  name="CommandTimeout">0</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the name of the database object used to open a rowset."
+                  name="OpenRowset">[dbo].[Tracks]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the variable that contains the name of the database object used to open a rowset."
+                  name="OpenRowsetVariable"></property>
+                <property
+                  dataType="System.String"
+                  description="The SQL command to be executed."
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                <property
+                  dataType="System.String"
+                  description="The variable that contains the SQL command to be executed."
+                  name="SqlCommandVariable"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1253</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Forces the use of the DefaultCodePage property value when describing character data."
+                  name="AlwaysUseDefaultCodePage">false</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the mode used to access the database."
+                  name="AccessMode"
+                  typeConverter="AccessMode">0</property>
+                <property
+                  dataType="System.String"
+                  description="The mappings between the parameters in the SQL command and variables."
+                  name="ParameterMapping"></property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\Load DimTracks\TracksStagingSSIS.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[DELL5570.ChinookStagingSSIS]"
+                  connectionManagerRefId="Package.ConnectionManagers[DELL5570.ChinookStagingSSIS]"
+                  description="The OLE DB runtime connection used to access the database."
+                  name="OleDbConnection" />
+              </connections>
+              <outputs>
+                <output
+                  refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output]"
+                  name="OLE DB Source Output">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackId]"
+                      dataType="i4"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackId]"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackId]"
+                      name="TrackId"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackName]"
+                      length="200"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackName]"
+                      name="TrackName"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackComposer]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackComposer]"
+                      length="220"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackComposer]"
+                      name="TrackComposer"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackMillisec]"
+                      dataType="i4"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackMillisec]"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackMillisec]"
+                      name="TrackMillisec"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[AlbumTitle]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[AlbumTitle]"
+                      length="160"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[AlbumTitle]"
+                      name="AlbumTitle"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[AristName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[AristName]"
+                      length="120"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[AristName]"
+                      name="AristName"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[GenreName]"
+                      dataType="wstr"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[GenreName]"
+                      length="120"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].Columns[GenreName]"
+                      name="GenreName"
+                      truncationRowDisposition="FailComponent" />
+                  </outputColumns>
+                  <externalMetadataColumns
+                    isUsed="True">
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackId]"
+                      dataType="i4"
+                      name="TrackId" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackName]"
+                      dataType="wstr"
+                      length="200"
+                      name="TrackName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackComposer]"
+                      dataType="wstr"
+                      length="220"
+                      name="TrackComposer" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackMillisec]"
+                      dataType="i4"
+                      name="TrackMillisec" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[AlbumTitle]"
+                      dataType="wstr"
+                      length="160"
+                      name="AlbumTitle" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[AristName]"
+                      dataType="wstr"
+                      length="120"
+                      name="AristName" />
+                    <externalMetadataColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[GenreName]"
+                      dataType="wstr"
+                      length="120"
+                      name="GenreName" />
+                  </externalMetadataColumns>
+                </output>
+                <output
+                  refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output]"
+                  isErrorOut="true"
+                  name="OLE DB Source Error Output">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackId]"
+                      dataType="i4"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackId]"
+                      name="TrackId" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackName]"
+                      dataType="wstr"
+                      length="200"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackName]"
+                      name="TrackName" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackComposer]"
+                      dataType="wstr"
+                      length="220"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackComposer]"
+                      name="TrackComposer" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackMillisec]"
+                      dataType="i4"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackMillisec]"
+                      name="TrackMillisec" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[AlbumTitle]"
+                      dataType="wstr"
+                      length="160"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[AlbumTitle]"
+                      name="AlbumTitle" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[AristName]"
+                      dataType="wstr"
+                      length="120"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[AristName]"
+                      name="AristName" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[GenreName]"
+                      dataType="wstr"
+                      length="120"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[GenreName]"
+                      name="GenreName" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+          </components>
+          <paths>
+            <path
+              refId="Package\Load DimTracks.Paths[OLE DB Source Output]"
+              endId="Package\Load DimTracks\DimTracksDWSSIS.Inputs[OLE DB Destination Input]"
+              name="OLE DB Source Output"
+              startId="Package\Load DimTracks\TracksStagingSSIS.Outputs[OLE DB Source Output]" />
+          </paths>
+        </pipeline>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable
+      DTS:refId="Package\Load FactSales"
+      DTS:CreationName="Microsoft.Pipeline"
+      DTS:DelayValidation="True"
+      DTS:Description="Data Flow Task"
+      DTS:DTSID="{9D8BFEE7-DB2E-4E4A-9390-9EB5317761E5}"
+      DTS:ExecutableType="Microsoft.Pipeline"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Load FactSales"
+      DTS:TaskContact="Performs high-performance data extraction, transformation and loading;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <pipeline
+          version="1">
+          <components>
+            <component
+              refId="Package\Load FactSales\CustomerKey-&gt;CustomerId"
+              componentClassID="Microsoft.Lookup"
+              contactInfo="Lookup;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;6"
+              description="Joins additional columns to the data flow by looking up values in a table. For example, join to the 'employee id' column the employees table to get 'hire date' and 'employee name'. We recommend this transformation when the lookup table can fit into memory."
+              name="CustomerKey-&gt;CustomerId"
+              usesDispositions="true"
+              version="6">
+              <properties>
+                <property
+                  dataType="System.String"
+                  description="Specifies the SQL statement that generates the lookup table."
+                  expressionType="Notify"
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor">select * from [dbo].[DimCustomers]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies a SQL statement that uses parameters to generate the lookup table."
+                  expressionType="Notify"
+                  name="SqlCommandParam"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor">select * from (select * from [dbo].[DimCustomers]) [refTable]
+where [refTable].[CustomerId] = ?</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the type of connection used to access the reference dataset."
+                  name="ConnectionType"
+                  typeConverter="LookupConnectionType">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the cache type of the lookup table."
+                  name="CacheType"
+                  typeConverter="CacheType">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies how the Lookup transformation handles rows without matching entries in the reference data set."
+                  name="NoMatchBehavior"
+                  typeConverter="LookupNoMatchBehavior">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the percentage of the cache that is allocated for rows with no matching entries in the reference dataset."
+                  name="NoMatchCachePercentage">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Maximum Memory Usage for Reference Cache on a 32 bit platform."
+                  name="MaxMemoryUsage">25</property>
+                <property
+                  dataType="System.Int64"
+                  description="Maximum Memory Usage for Reference Cache on a 64 bit platform."
+                  name="MaxMemoryUsage64">25</property>
+                <property
+                  dataType="System.String"
+                  description="Indicates whether to reference metadata in an XML format."
+                  name="ReferenceMetadataXml">&lt;referenceMetadata&gt;&lt;referenceColumns&gt;&lt;referenceColumn name="CustomerKey" dataType="DT_I4" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="CustomerId" dataType="DT_I4" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="CustomerName" dataType="DT_WSTR" length="61" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="CustomerCompany" dataType="DT_WSTR" length="80" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="CustomerCountry" dataType="DT_WSTR" length="40" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="CustomerState" dataType="DT_WSTR" length="40" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="CustomerCity" dataType="DT_WSTR" length="40" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="CustomerPostalCode" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="EmployeeName" dataType="DT_WSTR" length="41" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="RowIsCurrent" dataType="DT_I4" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="RowStartDate" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="RowEndDate" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="RowChangeReason" dataType="DT_STR" length="200" precision="0" scale="0" codePage="1253"/&gt;&lt;/referenceColumns&gt;&lt;/referenceMetadata&gt;</property>
+                <property
+                  containsID="true"
+                  dataType="System.String"
+                  description="Specifies the list of lineage identifiers that map to the parameters that the SQL statement in the SQLCommand property uses. Entries in the list are separated by semicolons."
+                  name="ParameterMap">#{Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerId]};</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1253</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Determines whether duplicate keys in the reference data should be treated as errors when full cache mode is used."
+                  name="TreatDuplicateKeysAsError">false</property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  connectionManagerRefId="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  description="Connection manager used to access lookup data."
+                  name="OleDbConnection" />
+              </connections>
+              <inputs>
+                <input
+                  refId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Inputs[Lookup Input]"
+                  name="Lookup Input">
+                  <inputColumns>
+                    <inputColumn
+                      refId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Inputs[Lookup Input].Columns[CustomerKey]"
+                      cachedDataType="i4"
+                      cachedName="CustomerId"
+                      errorOrTruncationOperation="Copy Column"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerId]"
+                      name="CustomerKey"
+                      truncationRowDisposition="FailComponent"
+                      usageType="readWrite">
+                      <properties>
+                        <property
+                          dataType="System.String"
+                          description="Specifies the column in the reference table that a column joins."
+                          name="JoinToReferenceColumn">CustomerId</property>
+                        <property
+                          dataType="System.String"
+                          description="Specifies the column in the reference table from which a column is copied."
+                          name="CopyFromReferenceColumn">CustomerKey</property>
+                      </properties>
+                    </inputColumn>
+                  </inputColumns>
+                  <externalMetadataColumns />
+                </input>
+              </inputs>
+              <outputs>
+                <output
+                  refId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Outputs[Lookup Match Output]"
+                  errorOrTruncationOperation="Lookup"
+                  errorRowDisposition="FailComponent"
+                  exclusionGroup="1"
+                  name="Lookup Match Output"
+                  synchronousInputId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Inputs[Lookup Input]">
+                  <externalMetadataColumns />
+                </output>
+                <output
+                  refId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Outputs[Lookup No Match Output]"
+                  description="The Lookup output that handles rows with no matching entries in the reference dataset. Use this output when the NoMatchBehavior property is set to &quot;Send rows with no matching entries to the no match output.&quot;"
+                  exclusionGroup="1"
+                  name="Lookup No Match Output"
+                  synchronousInputId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Inputs[Lookup Input]">
+                  <externalMetadataColumns />
+                </output>
+                <output
+                  refId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Outputs[Lookup Error Output]"
+                  exclusionGroup="1"
+                  isErrorOut="true"
+                  name="Lookup Error Output"
+                  synchronousInputId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Inputs[Lookup Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Outputs[Lookup Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Outputs[Lookup Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Outputs[Lookup Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Outputs[Lookup Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+            <component
+              refId="Package\Load FactSales\DateKey"
+              componentClassID="Microsoft.Lookup"
+              contactInfo="Lookup;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;6"
+              description="Joins additional columns to the data flow by looking up values in a table. For example, join to the 'employee id' column the employees table to get 'hire date' and 'employee name'. We recommend this transformation when the lookup table can fit into memory."
+              name="DateKey"
+              usesDispositions="true"
+              version="6">
+              <properties>
+                <property
+                  dataType="System.String"
+                  description="Specifies the SQL statement that generates the lookup table."
+                  expressionType="Notify"
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor">select * from [dbo].[DimDate]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies a SQL statement that uses parameters to generate the lookup table."
+                  expressionType="Notify"
+                  name="SqlCommandParam"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor">select * from (select * from [dbo].[DimDate]) [refTable]
+where [refTable].[Date] = ?</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the type of connection used to access the reference dataset."
+                  name="ConnectionType"
+                  typeConverter="LookupConnectionType">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the cache type of the lookup table."
+                  name="CacheType"
+                  typeConverter="CacheType">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies how the Lookup transformation handles rows without matching entries in the reference data set."
+                  name="NoMatchBehavior"
+                  typeConverter="LookupNoMatchBehavior">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the percentage of the cache that is allocated for rows with no matching entries in the reference dataset."
+                  name="NoMatchCachePercentage">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Maximum Memory Usage for Reference Cache on a 32 bit platform."
+                  name="MaxMemoryUsage">25</property>
+                <property
+                  dataType="System.Int64"
+                  description="Maximum Memory Usage for Reference Cache on a 64 bit platform."
+                  name="MaxMemoryUsage64">25</property>
+                <property
+                  dataType="System.String"
+                  description="Indicates whether to reference metadata in an XML format."
+                  name="ReferenceMetadataXml">&lt;referenceMetadata&gt;&lt;referenceColumns&gt;&lt;referenceColumn name="DateKey" dataType="DT_I4" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="Date" dataType="DT_DBTIMESTAMP" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="FullDateUK" dataType="DT_STR" length="10" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="FullDateUSA" dataType="DT_STR" length="10" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="DayOfMonth" dataType="DT_STR" length="2" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="DaySuffix" dataType="DT_STR" length="4" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="DayName" dataType="DT_STR" length="9" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="DayOfWeekUSA" dataType="DT_STR" length="1" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="DayOfWeekUK" dataType="DT_STR" length="1" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="DayOfWeekInMonth" dataType="DT_STR" length="2" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="DayOfWeekInYear" dataType="DT_STR" length="2" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="DayOfQuarter" dataType="DT_STR" length="3" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="DayOfYear" dataType="DT_STR" length="3" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="WeekOfMonth" dataType="DT_STR" length="1" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="WeekOfQuarter" dataType="DT_STR" length="2" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="WeekOfYear" dataType="DT_STR" length="2" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="Month" dataType="DT_STR" length="2" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="MonthName" dataType="DT_STR" length="9" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="MonthOfQuarter" dataType="DT_STR" length="2" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="Quarter" dataType="DT_STR" length="1" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="QuarterName" dataType="DT_STR" length="9" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="Year" dataType="DT_STR" length="4" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="YearName" dataType="DT_STR" length="7" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="MonthYear" dataType="DT_STR" length="10" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="MMYYYY" dataType="DT_STR" length="6" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="FirstDayOfMonth" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="LastDayOfMonth" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="FirstDayOfQuarter" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="LastDayOfQuarter" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="FirstDayOfYear" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="LastDayOfYear" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="IsHolidayUSA" dataType="DT_BOOL" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="IsWeekday" dataType="DT_BOOL" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="HolidayUSA" dataType="DT_STR" length="50" precision="0" scale="0" codePage="1253"/&gt;&lt;referenceColumn name="IsHolidayUK" dataType="DT_BOOL" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="HolidayUK" dataType="DT_STR" length="50" precision="0" scale="0" codePage="1253"/&gt;&lt;/referenceColumns&gt;&lt;/referenceMetadata&gt;</property>
+                <property
+                  containsID="true"
+                  dataType="System.String"
+                  description="Specifies the list of lineage identifiers that map to the parameters that the SQL statement in the SQLCommand property uses. Entries in the list are separated by semicolons."
+                  name="ParameterMap">#{Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[InvoiceDate]};</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1253</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Determines whether duplicate keys in the reference data should be treated as errors when full cache mode is used."
+                  name="TreatDuplicateKeysAsError">false</property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\Load FactSales\DateKey.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  connectionManagerRefId="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  description="Connection manager used to access lookup data."
+                  name="OleDbConnection" />
+              </connections>
+              <inputs>
+                <input
+                  refId="Package\Load FactSales\DateKey.Inputs[Lookup Input]"
+                  name="Lookup Input">
+                  <inputColumns>
+                    <inputColumn
+                      refId="Package\Load FactSales\DateKey.Inputs[Lookup Input].Columns[InvoiceDate]"
+                      cachedDataType="dbTimeStamp"
+                      cachedName="InvoiceDate"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[InvoiceDate]">
+                      <properties>
+                        <property
+                          dataType="System.String"
+                          description="Specifies the column in the reference table that a column joins."
+                          name="JoinToReferenceColumn">Date</property>
+                        <property
+                          dataType="System.Null"
+                          description="Specifies the column in the reference table from which a column is copied."
+                          name="CopyFromReferenceColumn" />
+                      </properties>
+                    </inputColumn>
+                  </inputColumns>
+                  <externalMetadataColumns />
+                </input>
+              </inputs>
+              <outputs>
+                <output
+                  refId="Package\Load FactSales\DateKey.Outputs[Lookup Match Output]"
+                  errorOrTruncationOperation="Lookup"
+                  errorRowDisposition="FailComponent"
+                  exclusionGroup="1"
+                  name="Lookup Match Output"
+                  synchronousInputId="Package\Load FactSales\DateKey.Inputs[Lookup Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load FactSales\DateKey.Outputs[Lookup Match Output].Columns[DateKey]"
+                      dataType="i4"
+                      errorOrTruncationOperation="Copy Column"
+                      lineageId="Package\Load FactSales\DateKey.Outputs[Lookup Match Output].Columns[DateKey]"
+                      name="DateKey"
+                      truncationRowDisposition="FailComponent">
+                      <properties>
+                        <property
+                          dataType="System.String"
+                          description="Specifies the column in the reference table from which a column is copied."
+                          name="CopyFromReferenceColumn">DateKey</property>
+                      </properties>
+                    </outputColumn>
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+                <output
+                  refId="Package\Load FactSales\DateKey.Outputs[Lookup No Match Output]"
+                  description="The Lookup output that handles rows with no matching entries in the reference dataset. Use this output when the NoMatchBehavior property is set to &quot;Send rows with no matching entries to the no match output.&quot;"
+                  exclusionGroup="1"
+                  name="Lookup No Match Output"
+                  synchronousInputId="Package\Load FactSales\DateKey.Inputs[Lookup Input]">
+                  <externalMetadataColumns />
+                </output>
+                <output
+                  refId="Package\Load FactSales\DateKey.Outputs[Lookup Error Output]"
+                  exclusionGroup="1"
+                  isErrorOut="true"
+                  name="Lookup Error Output"
+                  synchronousInputId="Package\Load FactSales\DateKey.Inputs[Lookup Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load FactSales\DateKey.Outputs[Lookup Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\DateKey.Outputs[Lookup Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load FactSales\DateKey.Outputs[Lookup Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\DateKey.Outputs[Lookup Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+            <component
+              refId="Package\Load FactSales\FactSalesDWSSIS"
+              componentClassID="Microsoft.OLEDBDestination"
+              contactInfo="OLE DB Destination;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;4"
+              description="OLE DB Destination"
+              name="FactSalesDWSSIS"
+              usesDispositions="true"
+              version="4">
+              <properties>
+                <property
+                  dataType="System.Int32"
+                  description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                  name="CommandTimeout">0</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the name of the database object used to open a rowset."
+                  name="OpenRowset">[dbo].[FactSales]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the variable that contains the name of the database object used to open a rowset."
+                  name="OpenRowsetVariable"></property>
+                <property
+                  dataType="System.String"
+                  description="The SQL command to be executed."
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1253</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Forces the use of the DefaultCodePage property value when describing character data."
+                  name="AlwaysUseDefaultCodePage">false</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the mode used to access the database."
+                  name="AccessMode"
+                  typeConverter="AccessMode">0</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Indicates whether the values supplied for identity columns will be copied to the destination. If false, values for identity columns will be auto-generated at the destination. Applies only if fast load is turned on."
+                  name="FastLoadKeepIdentity">false</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Indicates whether the columns containing null will have null inserted in the destination. If false, columns containing null will have their default values inserted at the destination. Applies only if fast load is turned on."
+                  name="FastLoadKeepNulls">false</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies options to be used with fast load.  Applies only if fast load is turned on."
+                  name="FastLoadOptions"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies when commits are issued during data insertion.  A value of 0 specifies that one commit will be issued at the end of data insertion.  Applies only if fast load is turned on."
+                  name="FastLoadMaxInsertCommitSize">2147483647</property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\Load FactSales\FactSalesDWSSIS.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  connectionManagerRefId="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  description="The OLE DB runtime connection used to access the database."
+                  name="OleDbConnection" />
+              </connections>
+              <inputs>
+                <input
+                  refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input]"
+                  errorOrTruncationOperation="Insert"
+                  errorRowDisposition="FailComponent"
+                  hasSideEffects="true"
+                  name="OLE DB Destination Input">
+                  <inputColumns>
+                    <inputColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].Columns[TrackId]"
+                      cachedDataType="i4"
+                      cachedName="TrackId"
+                      externalMetadataColumnId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackKey]"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackId]" />
+                    <inputColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].Columns[CustomerId]"
+                      cachedDataType="i4"
+                      cachedName="CustomerId"
+                      externalMetadataColumnId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerKey]"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerId]" />
+                    <inputColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].Columns[InvoiceId]"
+                      cachedDataType="i4"
+                      cachedName="InvoiceId"
+                      externalMetadataColumnId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[InvoiceId]"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[InvoiceId]" />
+                    <inputColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].Columns[DateKey]"
+                      cachedDataType="i4"
+                      cachedName="DateKey"
+                      externalMetadataColumnId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[InvoiceDateKey]"
+                      lineageId="Package\Load FactSales\DateKey.Outputs[Lookup Match Output].Columns[DateKey]" />
+                    <inputColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].Columns[UnitPrice]"
+                      cachedDataType="numeric"
+                      cachedName="UnitPrice"
+                      cachedPrecision="10"
+                      cachedScale="2"
+                      externalMetadataColumnId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackPrice]"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[UnitPrice]" />
+                  </inputColumns>
+                  <externalMetadataColumns
+                    isUsed="True">
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackKey]"
+                      dataType="i4"
+                      name="TrackKey" />
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[CustomerKey]"
+                      dataType="i4"
+                      name="CustomerKey" />
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[InvoiceDateKey]"
+                      dataType="i4"
+                      name="InvoiceDateKey" />
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[InvoiceId]"
+                      dataType="i4"
+                      name="InvoiceId" />
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input].ExternalColumns[TrackPrice]"
+                      dataType="r8"
+                      name="TrackPrice" />
+                  </externalMetadataColumns>
+                </input>
+              </inputs>
+              <outputs>
+                <output
+                  refId="Package\Load FactSales\FactSalesDWSSIS.Outputs[OLE DB Destination Error Output]"
+                  exclusionGroup="1"
+                  isErrorOut="true"
+                  name="OLE DB Destination Error Output"
+                  synchronousInputId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\FactSalesDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load FactSales\FactSalesDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\FactSalesDWSSIS.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+            <component
+              refId="Package\Load FactSales\SalesStagingSSIS"
+              componentClassID="Microsoft.OLEDBSource"
+              contactInfo="OLE DB Source;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;7"
+              description="OLE DB Source"
+              name="SalesStagingSSIS"
+              usesDispositions="true"
+              version="7">
+              <properties>
+                <property
+                  dataType="System.Int32"
+                  description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out."
+                  name="CommandTimeout">0</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the name of the database object used to open a rowset."
+                  name="OpenRowset">[dbo].[Sales]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies the variable that contains the name of the database object used to open a rowset."
+                  name="OpenRowsetVariable"></property>
+                <property
+                  dataType="System.String"
+                  description="The SQL command to be executed."
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor"></property>
+                <property
+                  dataType="System.String"
+                  description="The variable that contains the SQL command to be executed."
+                  name="SqlCommandVariable"></property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1253</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Forces the use of the DefaultCodePage property value when describing character data."
+                  name="AlwaysUseDefaultCodePage">false</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the mode used to access the database."
+                  name="AccessMode"
+                  typeConverter="AccessMode">0</property>
+                <property
+                  dataType="System.String"
+                  description="The mappings between the parameters in the SQL command and variables."
+                  name="ParameterMapping"></property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\Load FactSales\SalesStagingSSIS.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[DELL5570.ChinookStagingSSIS]"
+                  connectionManagerRefId="Package.ConnectionManagers[DELL5570.ChinookStagingSSIS]"
+                  description="The OLE DB runtime connection used to access the database."
+                  name="OleDbConnection" />
+              </connections>
+              <outputs>
+                <output
+                  refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output]"
+                  name="OLE DB Source Output">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackId]"
+                      dataType="i4"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackId]"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackId]"
+                      name="TrackId"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerId]"
+                      dataType="i4"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerId]"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[CustomerId]"
+                      name="CustomerId"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[InvoiceDate]"
+                      dataType="dbTimeStamp"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[InvoiceDate]"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[InvoiceDate]"
+                      name="InvoiceDate"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[InvoiceId]"
+                      dataType="i4"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[InvoiceId]"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[InvoiceId]"
+                      name="InvoiceId"
+                      truncationRowDisposition="FailComponent" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[UnitPrice]"
+                      dataType="numeric"
+                      errorOrTruncationOperation="Conversion"
+                      errorRowDisposition="FailComponent"
+                      externalMetadataColumnId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[UnitPrice]"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[UnitPrice]"
+                      name="UnitPrice"
+                      precision="10"
+                      scale="2"
+                      truncationRowDisposition="FailComponent" />
+                  </outputColumns>
+                  <externalMetadataColumns
+                    isUsed="True">
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[TrackId]"
+                      dataType="i4"
+                      name="TrackId" />
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[CustomerId]"
+                      dataType="i4"
+                      name="CustomerId" />
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[InvoiceDate]"
+                      dataType="dbTimeStamp"
+                      name="InvoiceDate" />
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[InvoiceId]"
+                      dataType="i4"
+                      name="InvoiceId" />
+                    <externalMetadataColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].ExternalColumns[UnitPrice]"
+                      dataType="numeric"
+                      name="UnitPrice"
+                      precision="10"
+                      scale="2" />
+                  </externalMetadataColumns>
+                </output>
+                <output
+                  refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output]"
+                  isErrorOut="true"
+                  name="OLE DB Source Error Output">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackId]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[TrackId]"
+                      name="TrackId" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerId]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[CustomerId]"
+                      name="CustomerId" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[InvoiceDate]"
+                      dataType="dbTimeStamp"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[InvoiceDate]"
+                      name="InvoiceDate" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[InvoiceId]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[InvoiceId]"
+                      name="InvoiceId" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[UnitPrice]"
+                      dataType="numeric"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[UnitPrice]"
+                      name="UnitPrice"
+                      precision="10"
+                      scale="2" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+            <component
+              refId="Package\Load FactSales\TrackKey-&gt;TrackId"
+              componentClassID="Microsoft.Lookup"
+              contactInfo="Lookup;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;6"
+              description="Joins additional columns to the data flow by looking up values in a table. For example, join to the 'employee id' column the employees table to get 'hire date' and 'employee name'. We recommend this transformation when the lookup table can fit into memory."
+              name="TrackKey-&gt;TrackId"
+              usesDispositions="true"
+              version="6">
+              <properties>
+                <property
+                  dataType="System.String"
+                  description="Specifies the SQL statement that generates the lookup table."
+                  expressionType="Notify"
+                  name="SqlCommand"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor">select * from [dbo].[DimTracks]</property>
+                <property
+                  dataType="System.String"
+                  description="Specifies a SQL statement that uses parameters to generate the lookup table."
+                  expressionType="Notify"
+                  name="SqlCommandParam"
+                  UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor">select * from (select * from [dbo].[DimTracks]) [refTable]
+where [refTable].[TrackId] = ?</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the type of connection used to access the reference dataset."
+                  name="ConnectionType"
+                  typeConverter="LookupConnectionType">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the cache type of the lookup table."
+                  name="CacheType"
+                  typeConverter="CacheType">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies how the Lookup transformation handles rows without matching entries in the reference data set."
+                  name="NoMatchBehavior"
+                  typeConverter="LookupNoMatchBehavior">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the percentage of the cache that is allocated for rows with no matching entries in the reference dataset."
+                  name="NoMatchCachePercentage">0</property>
+                <property
+                  dataType="System.Int32"
+                  description="Maximum Memory Usage for Reference Cache on a 32 bit platform."
+                  name="MaxMemoryUsage">25</property>
+                <property
+                  dataType="System.Int64"
+                  description="Maximum Memory Usage for Reference Cache on a 64 bit platform."
+                  name="MaxMemoryUsage64">25</property>
+                <property
+                  dataType="System.String"
+                  description="Indicates whether to reference metadata in an XML format."
+                  name="ReferenceMetadataXml">&lt;referenceMetadata&gt;&lt;referenceColumns&gt;&lt;referenceColumn name="TrackKey" dataType="DT_I4" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="TrackId" dataType="DT_I4" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="TrackName" dataType="DT_WSTR" length="200" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="TrackComposer" dataType="DT_WSTR" length="220" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="TrackLength" dataType="DT_I4" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="AlbumTitle" dataType="DT_WSTR" length="160" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="ArtistName" dataType="DT_WSTR" length="120" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="GenreName" dataType="DT_WSTR" length="120" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="RowIsCurrent" dataType="DT_I4" length="0" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="RowStartDate" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="RowEndDate" dataType="DT_WSTR" length="10" precision="0" scale="0" codePage="0"/&gt;&lt;referenceColumn name="RowChangeReason" dataType="DT_STR" length="200" precision="0" scale="0" codePage="1253"/&gt;&lt;/referenceColumns&gt;&lt;/referenceMetadata&gt;</property>
+                <property
+                  containsID="true"
+                  dataType="System.String"
+                  description="Specifies the list of lineage identifiers that map to the parameters that the SQL statement in the SQLCommand property uses. Entries in the list are separated by semicolons."
+                  name="ParameterMap">#{Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackId]};</property>
+                <property
+                  dataType="System.Int32"
+                  description="Specifies the column code page to use when code page information is unavailable from the data source."
+                  name="DefaultCodePage">1253</property>
+                <property
+                  dataType="System.Boolean"
+                  description="Determines whether duplicate keys in the reference data should be treated as errors when full cache mode is used."
+                  name="TreatDuplicateKeysAsError">false</property>
+              </properties>
+              <connections>
+                <connection
+                  refId="Package\Load FactSales\TrackKey-&gt;TrackId.Connections[OleDbConnection]"
+                  connectionManagerID="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  connectionManagerRefId="Package.ConnectionManagers[DELL5570.ChinookDWSSIS]"
+                  description="Connection manager used to access lookup data."
+                  name="OleDbConnection" />
+              </connections>
+              <inputs>
+                <input
+                  refId="Package\Load FactSales\TrackKey-&gt;TrackId.Inputs[Lookup Input]"
+                  name="Lookup Input">
+                  <inputColumns>
+                    <inputColumn
+                      refId="Package\Load FactSales\TrackKey-&gt;TrackId.Inputs[Lookup Input].Columns[TrackKey]"
+                      cachedDataType="i4"
+                      cachedName="TrackId"
+                      errorOrTruncationOperation="Copy Column"
+                      lineageId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output].Columns[TrackId]"
+                      name="TrackKey"
+                      truncationRowDisposition="FailComponent"
+                      usageType="readWrite">
+                      <properties>
+                        <property
+                          dataType="System.String"
+                          description="Specifies the column in the reference table that a column joins."
+                          name="JoinToReferenceColumn">TrackId</property>
+                        <property
+                          dataType="System.String"
+                          description="Specifies the column in the reference table from which a column is copied."
+                          name="CopyFromReferenceColumn">TrackKey</property>
+                      </properties>
+                    </inputColumn>
+                  </inputColumns>
+                  <externalMetadataColumns />
+                </input>
+              </inputs>
+              <outputs>
+                <output
+                  refId="Package\Load FactSales\TrackKey-&gt;TrackId.Outputs[Lookup Match Output]"
+                  errorOrTruncationOperation="Lookup"
+                  errorRowDisposition="FailComponent"
+                  exclusionGroup="1"
+                  name="Lookup Match Output"
+                  synchronousInputId="Package\Load FactSales\TrackKey-&gt;TrackId.Inputs[Lookup Input]">
+                  <externalMetadataColumns />
+                </output>
+                <output
+                  refId="Package\Load FactSales\TrackKey-&gt;TrackId.Outputs[Lookup No Match Output]"
+                  description="The Lookup output that handles rows with no matching entries in the reference dataset. Use this output when the NoMatchBehavior property is set to &quot;Send rows with no matching entries to the no match output.&quot;"
+                  exclusionGroup="1"
+                  name="Lookup No Match Output"
+                  synchronousInputId="Package\Load FactSales\TrackKey-&gt;TrackId.Inputs[Lookup Input]">
+                  <externalMetadataColumns />
+                </output>
+                <output
+                  refId="Package\Load FactSales\TrackKey-&gt;TrackId.Outputs[Lookup Error Output]"
+                  exclusionGroup="1"
+                  isErrorOut="true"
+                  name="Lookup Error Output"
+                  synchronousInputId="Package\Load FactSales\TrackKey-&gt;TrackId.Inputs[Lookup Input]">
+                  <outputColumns>
+                    <outputColumn
+                      refId="Package\Load FactSales\TrackKey-&gt;TrackId.Outputs[Lookup Error Output].Columns[ErrorCode]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\TrackKey-&gt;TrackId.Outputs[Lookup Error Output].Columns[ErrorCode]"
+                      name="ErrorCode"
+                      specialFlags="1" />
+                    <outputColumn
+                      refId="Package\Load FactSales\TrackKey-&gt;TrackId.Outputs[Lookup Error Output].Columns[ErrorColumn]"
+                      dataType="i4"
+                      lineageId="Package\Load FactSales\TrackKey-&gt;TrackId.Outputs[Lookup Error Output].Columns[ErrorColumn]"
+                      name="ErrorColumn"
+                      specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+          </components>
+          <paths>
+            <path
+              refId="Package\Load FactSales.Paths[Lookup Match Output]"
+              endId="Package\Load FactSales\DateKey.Inputs[Lookup Input]"
+              name="Lookup Match Output"
+              startId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Outputs[Lookup Match Output]" />
+            <path
+              refId="Package\Load FactSales.Paths[Lookup Match Output1]"
+              endId="Package\Load FactSales\TrackKey-&gt;TrackId.Inputs[Lookup Input]"
+              name="Lookup Match Output"
+              startId="Package\Load FactSales\DateKey.Outputs[Lookup Match Output]" />
+            <path
+              refId="Package\Load FactSales.Paths[Lookup Match Output2]"
+              endId="Package\Load FactSales\FactSalesDWSSIS.Inputs[OLE DB Destination Input]"
+              name="Lookup Match Output"
+              startId="Package\Load FactSales\TrackKey-&gt;TrackId.Outputs[Lookup Match Output]" />
+            <path
+              refId="Package\Load FactSales.Paths[OLE DB Source Output]"
+              endId="Package\Load FactSales\CustomerKey-&gt;CustomerId.Inputs[Lookup Input]"
+              name="OLE DB Source Output"
+              startId="Package\Load FactSales\SalesStagingSSIS.Outputs[OLE DB Source Output]" />
+          </paths>
+        </pipeline>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint]"
+      DTS:CreationName=""
+      DTS:DTSID="{01797CBA-724D-414C-BB50-0FF2B8CF56BD}"
+      DTS:From="Package\Create DW Tables"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint"
+      DTS:To="Package\Create DimDate" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 1]"
+      DTS:CreationName=""
+      DTS:DTSID="{EA0D859B-5A8C-4E97-804A-25B25BA945C8}"
+      DTS:From="Package\Create DimDate"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 1"
+      DTS:To="Package\Load DimCustomers"
+      DTS:Value="2" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 2]"
+      DTS:CreationName=""
+      DTS:DTSID="{DB44912C-AEF1-49E1-922F-DE473CBCD17C}"
+      DTS:From="Package\Load DimCustomers"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 2"
+      DTS:To="Package\Load DimTracks" />
+    <DTS:PrecedenceConstraint
+      DTS:refId="Package.PrecedenceConstraints[Constraint 3]"
+      DTS:CreationName=""
+      DTS:DTSID="{B2E967D7-0468-478A-889B-F2CD8A9FCBF9}"
+      DTS:From="Package\Load DimTracks"
+      DTS:LogicalAnd="True"
+      DTS:ObjectName="Constraint 3"
+      DTS:To="Package\Load FactSales"
+      DTS:Value="2" />
+  </DTS:PrecedenceConstraints>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="16" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mssgm="clr-namespace:Microsoft.SqlServer.Graph.Model;assembly=Microsoft.SqlServer.Graph" xmlns:s="clr-namespace:System;assembly=mscorlib">
+        <NodeLayout
+          Size="163.2,41.6"
+          Id="Package\Create DW Tables"
+          TopLeft="22.2857142735499,5.49999999999999" />
+        <NodeLayout
+          Size="172.8,41.6"
+          Id="Package\Load DimCustomers"
+          TopLeft="24.4285714209692,137.794117531098" />
+        <NodeLayout
+          Size="153.6,41.6"
+          Id="Package\Load DimTracks"
+          TopLeft="28,204.323529237489" />
+        <NodeLayout
+          Size="152.8,41.6"
+          Id="Package\Create DimDate"
+          TopLeft="29.0428577647528,73.3176469167211" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 1]"
+          TopLeft="108.135714592861,114.917646916721">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,22.8764706143769"
+              Start="0,0"
+              End="0,15.3764706143769">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,15.3764706143769" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-25.304453125,1.88354780718846,50.60890625,11.609375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint]"
+          TopLeft="104.664286019151,47.1">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,26.2176469167211"
+              Start="0,0"
+              End="0,18.7176469167211">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,18.7176469167211" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 2]"
+          TopLeft="107.814285710485,179.394117531098">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,24.929411706391"
+              Start="0,0"
+              End="0,17.429411706391">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,17.429411706391" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <NodeLayout
+          Size="148,42.4"
+          Id="Package\Load FactSales"
+          TopLeft="31.9000006279779,270.329411489886" />
+        <EdgeLayout
+          Id="Package.PrecedenceConstraints[Constraint 3]"
+          TopLeft="105.350000313989,245.923529237489">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,24.4058822523967"
+              Start="0,0"
+              End="0,16.9058822523967">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,16.9058822523967" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-25.304453125,2.64825362619834,50.60890625,11.609375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <GroupLayout
+          Text="                 Load to DW"
+          ParentId="Package"
+          HeaderHeight="43"
+          IsExpanded="True"
+          PanelSize="202.4,318.4"
+          Size="202.4,361.6"
+          Id="26c1ffe4-8da7-4ce7-a285-f5248df345e7"
+          TopLeft="286.371428653536,5.5">
+          <GroupLayout.ChildrenIds>
+            <s:String>Package\Create DW Tables</s:String>
+            <s:String>Package\Load DimCustomers</s:String>
+            <s:String>Package\Load DimTracks</s:String>
+            <s:String>Package\Create DimDate</s:String>
+            <s:String>Package.PrecedenceConstraints[Constraint 1]</s:String>
+            <s:String>Package.PrecedenceConstraints[Constraint]</s:String>
+            <s:String>Package.PrecedenceConstraints[Constraint 2]</s:String>
+            <s:String>Package\Load FactSales</s:String>
+            <s:String>Package.PrecedenceConstraints[Constraint 3]</s:String>
+          </GroupLayout.ChildrenIds>
+        </GroupLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+  <TaskHost
+    design-time-name="Package\Load DimCustomers">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="8" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="184.8,41.6"
+          Id="Package\Load DimCustomers\CustomersStagingSSIS"
+          TopLeft="221.428571899935,57.3529411261985" />
+        <NodeLayout
+          Size="156,41.6"
+          Id="Package\Load DimCustomers\Create FullName"
+          TopLeft="240.714286226703,126.941176359319" />
+        <NodeLayout
+          Size="185.6,41.6"
+          Id="Package\Load DimCustomers\DimCustomersDWSSIS"
+          TopLeft="222.142857615741,198.823529237488" />
+        <EdgeLayout
+          Id="Package\Load DimCustomers.Paths[OLE DB Source Output]"
+          TopLeft="316.271429063319,98.9529411261985">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,27.9882352331209"
+              Start="0,0"
+              End="0,20.4882352331209">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,20.4882352331209" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Load DimCustomers.Paths[Derived Column Output]"
+          TopLeft="316.828571921222,168.541176359319">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,30.2823528781687"
+              Start="0,0"
+              End="0,22.7823528781687">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,22.7823528781687" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </TaskHost>
+  <PipelineComponentMetadata
+    design-time-name="Package\Load DimCustomers\CustomersStagingSSIS">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q2:string">Table</Value>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+  <PipelineComponentMetadata
+    design-time-name="Package\Load DimCustomers\DimCustomersDWSSIS">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q2:string">Table</Value>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+  <TaskHost
+    design-time-name="Package\Load DimTracks">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml">
+        <NodeLayout
+          Size="166.4,41.6"
+          Id="Package\Load DimTracks\TracksStagingSSIS"
+          TopLeft="514.999992325902,15.9999997615814" />
+        <NodeLayout
+          Size="166.4,41.6"
+          Id="Package\Load DimTracks\DimTracksDWSSIS"
+          TopLeft="514.999992325902,82.9999987632036" />
+        <EdgeLayout
+          Id="Package\Load DimTracks.Paths[OLE DB Source Output]"
+          TopLeft="598.199992325902,57.5999997615814">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,25.3999990016222"
+              Start="0,0"
+              End="0,17.8999990016222">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,17.8999990016222" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </TaskHost>
+  <PipelineComponentMetadata
+    design-time-name="Package\Load DimTracks\DimTracksDWSSIS">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q2:string">Table</Value>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+  <PipelineComponentMetadata
+    design-time-name="Package\Load DimTracks\TracksStagingSSIS">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q2:string">Table</Value>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+  <TaskHost
+    design-time-name="Package\Load FactSales">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="16" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph" xmlns:mssgle="clr-namespace:Microsoft.SqlServer.Graph.LayoutEngine;assembly=Microsoft.SqlServer.Graph" xmlns:assembly="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mssgm="clr-namespace:Microsoft.SqlServer.Graph.Model;assembly=Microsoft.SqlServer.Graph">
+        <NodeLayout
+          Size="160.8,41.6"
+          Id="Package\Load FactSales\FactSalesDWSSIS"
+          TopLeft="333.999995023012,372.999994441867" />
+        <NodeLayout
+          Size="160,41.6"
+          Id="Package\Load FactSales\SalesStagingSSIS"
+          TopLeft="328.999995097518,52.9999992102385" />
+        <NodeLayout
+          Size="117.6,41.6"
+          Id="Package\Load FactSales\DateKey"
+          TopLeft="351.999994754791,214.99999679625" />
+        <NodeLayout
+          Size="168.8,41.6"
+          Id="Package\Load FactSales\TrackKey-&gt;TrackId"
+          TopLeft="329.999995082617,291.999995648861" />
+        <NodeLayout
+          Size="207.2,41.6"
+          Id="Package\Load FactSales\CustomerKey-&gt;CustomerId"
+          TopLeft="312.999995335936,131.999998033047" />
+        <EdgeLayout
+          Id="Package\Load FactSales.Paths[Lookup Match Output2]"
+          TopLeft="414.399995052815,333.599995648861">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,39.3999987930059"
+              Start="0,0"
+              End="0,31.8999987930059">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,31.8999987930059" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-48.19138671875,10.1453118965029,96.3827734375,11.609375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Load FactSales.Paths[Lookup Match Output1]"
+          TopLeft="412.599994918704,256.59999679625">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,35.3999988526105"
+              Start="0,0"
+              End="0,27.8999988526105">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,27.8999988526105" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-48.19138671875,8.14531192630525,96.3827734375,11.609375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Load FactSales.Paths[Lookup Match Output]"
+          TopLeft="413.699995045364,173.599998033047">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,41.3999987632037"
+              Start="0,0"
+              End="0,33.8999987632037">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,33.8999987632037" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <mssgm:EdgeLabel
+              BoundingBox="-48.19138671875,11.1453118816018,96.3827734375,11.609375"
+              RelativePosition="Any" />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+        <EdgeLayout
+          Id="Package\Load FactSales.Paths[OLE DB Source Output]"
+          TopLeft="412.799995216727,94.5999992102385">
+          <EdgeLayout.Curve>
+            <mssgle:Curve
+              StartConnector="{assembly:Null}"
+              EndConnector="0,37.3999988228083"
+              Start="0,0"
+              End="0,29.8999988228083">
+              <mssgle:Curve.Segments>
+                <mssgle:SegmentCollection
+                  Capacity="5">
+                  <mssgle:LineSegment
+                    End="0,29.8999988228083" />
+                </mssgle:SegmentCollection>
+              </mssgle:Curve.Segments>
+            </mssgle:Curve>
+          </EdgeLayout.Curve>
+          <EdgeLayout.Labels>
+            <EdgeLabelCollection />
+          </EdgeLayout.Labels>
+        </EdgeLayout>
+      </GraphLayout>
+    </LayoutInfo>
+  </TaskHost>
+  <PipelineComponentMetadata
+    design-time-name="Package\Load FactSales\TrackKey-&gt;TrackId">
+    <Properties>
+      <Property>
+        <Name>OverwriteParamsSQLProp</Name>
+        <Value
+          type="q2:string">false</Value>
+      </Property>
+      <Property>
+        <Name>UsedTableName</Name>
+        <Value
+          type="q3:string">[dbo].[DimTracks]</Value>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q4:string">0</Value>
+      </Property>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+  <PipelineComponentMetadata
+    design-time-name="Package\Load FactSales\DateKey">
+    <Properties>
+      <Property>
+        <Name>OverwriteParamsSQLProp</Name>
+        <Value
+          type="q2:string">false</Value>
+      </Property>
+      <Property>
+        <Name>UsedTableName</Name>
+        <Value
+          type="q3:string">[dbo].[DimDate]</Value>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q4:string">0</Value>
+      </Property>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+  <PipelineComponentMetadata
+    design-time-name="Package\Load FactSales\CustomerKey-&gt;CustomerId">
+    <Properties>
+      <Property>
+        <Name>OverwriteParamsSQLProp</Name>
+        <Value
+          type="q2:string">false</Value>
+      </Property>
+      <Property>
+        <Name>UsedTableName</Name>
+        <Value
+          type="q3:string">[dbo].[DimCustomers]</Value>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q4:string">0</Value>
+      </Property>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+  <PipelineComponentMetadata
+    design-time-name="Package\Load FactSales\FactSalesDWSSIS">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q2:string">Table</Value>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+  <PipelineComponentMetadata
+    design-time-name="Package\Load FactSales\SalesStagingSSIS">
+    <Properties>
+      <Property>
+        <Name>DataSourceViewID</Name>
+      </Property>
+      <Property>
+        <Name>TableInfoObjectType</Name>
+        <Value
+          type="q2:string">Table</Value>
+      </Property>
+    </Properties>
+  </PipelineComponentMetadata>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>

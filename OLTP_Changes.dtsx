@@ -1,0 +1,72 @@
+﻿<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="12/11/2023 8:11:52 PM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="DELL5570"
+  DTS:CreatorName="DELL5570\nikos"
+  DTS:DTSID="{0D6DD0D7-4E78-4D88-924B-DAFB8CFA3446}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="16.0.5396.0"
+  DTS:LocaleID="1032"
+  DTS:ObjectName="Package1"
+  DTS:PackageType="5"
+  DTS:VersionBuild="6"
+  DTS:VersionGUID="{9E9E151D-31BB-4A11-822A-D13E8915B053}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[DELL5570.Chinook]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{004FD3FC-FDC5-4EF1-8C0B-5F9938070AE9}"
+      DTS:ObjectName="DELL5570.Chinook">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectRetryCount="1"
+          DTS:ConnectRetryInterval="5"
+          DTS:ConnectionString="Data Source=DELL5570;Initial Catalog=Chinook;Provider=SQLOLEDB.1;Integrated Security=SSPI;Application Name=SSIS-Package1-{004FD3FC-FDC5-4EF1-8C0B-5F9938070AE9}DELL5570.Chinook;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables />
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\OLTP Changes for Customer &amp; Invoice &amp; InvoiceLine"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{3E76E42B-C739-4931-97FB-D35CBBE04DCE}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="OLTP Changes for Customer &amp; Invoice &amp; InvoiceLine"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2022; © 2022 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{004FD3FC-FDC5-4EF1-8C0B-5F9938070AE9}"
+          SQLTask:SqlStatementSource="--changes in OLTP&#xA;USE [Chinook]&#xA;GO&#xA;&#xA;--  Update a Customer in the table Customer&#xA;update [dbo].[Customer] set &#xA;&#x9;Address = 'Konitsas 15',&#xA;&#x9;City = 'Athens',&#xA;&#x9;State = 'Attiki',&#xA;&#x9;Country = 'Greece', &#xA;&#x9;PostalCode = '11526'&#xA;where [CustomerId] = '1';&#xA;&#xA;--  Insert a Customer in the table Customer&#xA;INSERT INTO [dbo].[Customer](&#xA;[CustomerId],&#xA;[FirstName],&#xA;[LastName],&#xA;[Company],&#xA;[Address],&#xA;[City],&#xA;[State],&#xA;[Country],&#xA;[PostalCode],&#xA;[Phone],&#xA;[Email],&#xA;[SupportRepId]&#xA;)&#xA;VALUES(&#xA;'60',&#xA;'Dimitris',&#xA;'Georgakis',&#xA;'Gati Company',&#xA;'Iracliou',&#xA;'Athens',&#xA;'Attiki',&#xA;'Greece',&#xA;11527,&#xA;'+306954897536',&#xA;'xxxx',&#xA;'3'&#xA;);&#xA;&#xA;--  Find a  customer with no Invoices to delete&#xA;--select c.CustomerID &#xA;--from Customer c left join [Invoice] i&#xA;--on i.CustomerID = c.CustomerID&#xA;--where i.InvoiceId is null;&#xA;&#x9;&#x9;   &#xA;--  Delete a Customer from the table Customer&#xA;--delete from [dbo].[Customer] where [CustomerID] = '60';&#xA;&#xA;&#xA;--  Insert new sale into Fact table Invoice&#xA;INSERT INTO [dbo].[Invoice](&#xA;[InvoiceId],&#xA;[CustomerID],&#xA;[InvoiceDate],&#xA;[Total]&#xA;)&#xA;VALUES(&#xA;'413',&#xA;'60',&#xA;'2013-12-23',&#xA;'1.98'&#xA;),&#xA;(&#xA;'414',&#xA;'1',&#xA;'2013-12-23',&#xA;'0.99'&#xA;);&#xA;&#xA;--  Insert new Invoice Line into table InvoiceLine&#xA;INSERT INTO [dbo].[InvoiceLine](&#xA;[InvoiceLineId],&#xA;[InvoiceId],&#xA;[TrackId],&#xA;[UnitPrice],&#xA;[Quantity]&#xA;)&#xA;VALUES&#xA;(2241, 413, 1, 0.99, 1),&#xA;(2242, 413, 2, 0.99, 1),&#xA;(2243, 414, 1, 0.99, 1);" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph">
+        <NodeLayout
+          Size="326.4,41.6"
+          Id="Package\OLTP Changes for Customer &amp; Invoice &amp; InvoiceLine"
+          TopLeft="226.428571910579,133.823529294464" />
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>
